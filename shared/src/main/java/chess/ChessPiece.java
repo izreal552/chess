@@ -3,6 +3,7 @@ package chess;
 import chess.MoveCalcs.*;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -61,5 +62,27 @@ public class ChessPiece {
             case ROOK -> RookMoveCalc.getMove(board,myPosition);
             case PAWN -> PawnMoveCalc.getMove(board,myPosition);
         };
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "team=" + team +
+                ", type=" + type +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece piece = (ChessPiece) o;
+        return team == piece.team && type == piece.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(team, type);
     }
 }

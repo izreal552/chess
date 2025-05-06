@@ -25,15 +25,12 @@ public class MoveCalc {
                 ChessPosition newPos = new ChessPosition(curr_Y + dir[1] * i, curr_X + dir[0] * i);
                 if (!isValid(newPos)) {
                     blocked = true;
-                }
-                else if (board.getPiece(newPos) == null) {
+                } else if (board.getPiece(newPos) == null) {
                     moves.add(new ChessMove(pos, newPos, null));
-                }
-                else if (board.getPiece(newPos).getTeamColor() != team) {
+                } else if (board.getPiece(newPos).getTeamColor() != team) {
                     moves.add(new ChessMove(pos, newPos, null));
                     blocked = true;
-                }
-                else if (board.getPiece(newPos).getTeamColor() == team) {
+                } else if (board.getPiece(newPos).getTeamColor() == team) {
                     blocked = true;
                 }
                 i++;
@@ -43,7 +40,7 @@ public class MoveCalc {
 
     }
 
-    static HashSet<ChessMove> singleMovement(ChessBoard board, ChessPosition pos, int[][] possible_Movement, int curr_Y, int curr_X, ChessGame.TeamColor team){
+    static HashSet<ChessMove> singleMovement(ChessBoard board, ChessPosition pos, int[][] possible_Movement, int curr_Y, int curr_X, ChessGame.TeamColor team) {
         HashSet<ChessMove> moves = new HashSet<>();
         for (int[] move : possible_Movement) {
             ChessPosition newPos = new ChessPosition(curr_Y + move[1], curr_X + move[0]);
