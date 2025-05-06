@@ -1,5 +1,7 @@
 package chess;
 
+import chess.MoveCalcs.BishopMoveCalc;
+
 import java.util.Collection;
 
 /**
@@ -10,9 +12,9 @@ import java.util.Collection;
  */
 public class ChessPiece {
     private final ChessGame.TeamColor team;
-    private final ChessPiece.PieceType type;
+    private final PieceType type;
 
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+    public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.team = pieceColor;
         this.type = type;
     }
@@ -51,6 +53,13 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return null;
+        return switch (type){
+            case KING -> null;
+            case QUEEN -> null;
+            case BISHOP -> BishopMoveCalc.getMove(board,myPosition);
+            case KNIGHT -> null;
+            case ROOK -> null;
+            case PAWN -> null;
+        };
     }
 }
