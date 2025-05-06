@@ -6,9 +6,9 @@ import java.util.HashSet;
 
 public class MoveCalc {
     //clean slate
-    static HashSet<ChessMove> getMove(ChessBoard board, ChessPosition pos) {
-        return null;
-    }
+//    static HashSet<ChessMove> getMove(ChessBoard board, ChessPosition pos) {
+//        return null;
+//    }
 
     //Is the move within the constraints of the board
     static boolean isValid(ChessPosition position) {
@@ -43,12 +43,10 @@ public class MoveCalc {
 
     }
 
-    static HashSet<ChessMove> knightMovement(ChessBoard board, ChessPosition pos, int[][] possible_Movement, int curr_Y, int curr_X, ChessGame.TeamColor team){
+    static HashSet<ChessMove> singleMovement(ChessBoard board, ChessPosition pos, int[][] possible_Movement, int curr_Y, int curr_X, ChessGame.TeamColor team){
         HashSet<ChessMove> moves = new HashSet<>();
         for (int[] move : possible_Movement) {
-            int newY = curr_Y + move[1];
-            int newX = curr_X + move[0];
-            ChessPosition newPos = new ChessPosition(newY, newX);
+            ChessPosition newPos = new ChessPosition(curr_Y + move[1], curr_X + move[0]);
 
             if (isValid(newPos)) {
                 ChessPiece targetPiece = board.getPiece(newPos);
