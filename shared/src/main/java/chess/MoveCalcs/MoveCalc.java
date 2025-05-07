@@ -5,10 +5,6 @@ import chess.*;
 import java.util.HashSet;
 
 public class MoveCalc {
-    //clean slate
-//    static HashSet<ChessMove> getMove(ChessBoard board, ChessPosition pos) {
-//        return null;
-//    }
 
     //Is the move within the constraints of the board
     static boolean isValid(ChessPosition position) {
