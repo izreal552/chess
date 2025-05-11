@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -12,8 +13,6 @@ import java.util.HashSet;
 public class ChessGame {
     private TeamColor teamTurn;
     private ChessBoard board;
-
-    private boolean gameOver;
 
     public ChessGame() {
         board = new ChessBoard();
@@ -81,9 +80,12 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        boolean isTeamsTurn = getTeamTurn() == board.getPiece(move.getStartPosition()).getTeamColor();
+        ChessPiece temp = board.getPiece(move.getStartPosition());
+        if(temp == null){
+            throw new InvalidMoveException();
+        }
+        boolean isTeamsTurn = getTeamTurn() == temp.getTeamColor();
         Collection<ChessMove> moves = validMoves(move.getStartPosition());
-
         if(moves == null){
             throw new InvalidMoveException("No valid moves");
         }
@@ -150,7 +152,26 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        return isInCheck(teamColor) && isInStalemate(teamColor);
+        if (!isInCheck(teamColor)) {
+            return false; // Not in check, so not in checkmate
+        }
+
+        // Iterate through all team pieces to check for any valid escape move (including king capturing)
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(pos);
+
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> moves = validMoves(pos);
+                    if (moves != null && !moves.isEmpty()) {
+                        return false; // At least one piece has a move that prevents check
+                    }
+                }
+            }
+        }
+
+        return true; // No valid moves found, and king is in check
     }
 
     /**
@@ -161,6 +182,12 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
+        if(teamTurn != teamColor){
+            return false;
+        }
+        if(isInCheck(teamColor)){
+            return false;
+        }
         for(int row = 1; row <= 8; row++){
             for(int col = 1; col <= 8; col++){
                 ChessPosition pos = new ChessPosition(row,col);
@@ -194,14 +221,28 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        return board;
+       return board;
     }
 
-    public boolean isGameOver() {
-        return gameOver;
+    @Override
+    public String toString() {
+        return "ChessGame{" +
+                "teamTurn=" + teamTurn +
+                ", board=" + board +
+                '}';
     }
 
-    public void setGameOver(boolean gameOver) {
-        this.gameOver = gameOver;
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return teamTurn == chessGame.teamTurn && Objects.equals(board, chessGame.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamTurn, board);
     }
 }
