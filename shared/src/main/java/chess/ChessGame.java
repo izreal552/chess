@@ -117,17 +117,18 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
 //        ChessPosition kingPos = null;
         ChessPosition kingPos = findKingPosition(teamColor);
-        for(int row = 1; row <= 8; row++){
-            for(int col = 1; col <= 8; col++){
-                ChessPosition pos = new ChessPosition(row,col);
-                ChessPiece piece = board.getPiece(pos);
-                if (piece != null && piece.getTeamColor() == teamColor && piece.getPieceType() == ChessPiece.PieceType.KING) {
-                    kingPos = pos;
-                    break;
-                }
-            }
-            if (kingPos != null) {break;}
-        }
+//        for(int row = 1; row <= 8; row++){
+//            for(int col = 1; col <= 8; col++){
+//                ChessPosition pos = new ChessPosition(row,col);
+//                ChessPiece piece = board.getPiece(pos);
+//                if (piece != null && piece.getTeamColor() == teamColor && piece.getPieceType() == ChessPiece.PieceType.KING) {
+//                    kingPos = pos;
+//                    break;
+//                }
+//            }
+//            if (kingPos != null) {break;}
+//        }
+        if(kingPos == null){return false;}
 
         //Check if any piece can attack the king
         for (int row = 1; row <= 8; row++) {
