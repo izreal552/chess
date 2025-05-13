@@ -16,6 +16,7 @@ public class ChessGame {
 
     public ChessGame() {
         board = new ChessBoard();
+        board.resetBoard();
         setTeamTurn(TeamColor.WHITE);
     }
 
@@ -221,7 +222,7 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-       return board;
+        return board;
     }
 
     @Override
