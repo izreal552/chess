@@ -125,7 +125,7 @@ public class ChessGame {
                     break;
                 }
             }
-            if (kingPos != null) break;
+            if (kingPos != null) {break;}
         }
 
         //Check if any piece can attack the king
@@ -135,16 +135,18 @@ public class ChessGame {
                 ChessPiece piece = board.getPiece(pos);
 
                 if (piece != null && piece.getTeamColor() != teamColor) {
+                    // Get the possible moves for this piece
                     Collection<ChessMove> moves = piece.pieceMoves(board, pos);
+                    // Check if any of the moves target the king's position
                     for (ChessMove move : moves) {
                         if (move.getEndPosition().equals(kingPos)) {
-                            return true;
+                            return true; // If a move reaches the king, it's a check
                         }
                     }
                 }
             }
         }
-        return false;
+        return false; // No opponent pieces can attack the king
     }
     /**
      * Determines if the given team is in checkmate
