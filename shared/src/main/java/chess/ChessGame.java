@@ -115,7 +115,8 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        ChessPosition kingPos = null;
+//        ChessPosition kingPos = null;
+        ChessPosition kingPos = findKingPosition(teamColor);
         for(int row = 1; row <= 8; row++){
             for(int col = 1; col <= 8; col++){
                 ChessPosition pos = new ChessPosition(row,col);
@@ -135,18 +136,30 @@ public class ChessGame {
                 ChessPiece piece = board.getPiece(pos);
 
                 if (piece != null && piece.getTeamColor() != teamColor) {
-                    // Get the possible moves for this piece
                     Collection<ChessMove> moves = piece.pieceMoves(board, pos);
-                    // Check if any of the moves target the king's position
                     for (ChessMove move : moves) {
                         if (move.getEndPosition().equals(kingPos)) {
-                            return true; // If a move reaches the king, it's a check
+                            return true;
                         }
                     }
                 }
             }
         }
-        return false; // No opponent pieces can attack the king
+        return false;
+    }
+    private ChessPosition findKingPosition(TeamColor teamColor) {
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(pos);
+                if (piece != null &&
+                        piece.getTeamColor() == teamColor &&
+                        piece.getPieceType() == ChessPiece.PieceType.KING) {
+                    return pos;
+                }
+            }
+        }
+        return null;
     }
     /**
      * Determines if the given team is in checkmate

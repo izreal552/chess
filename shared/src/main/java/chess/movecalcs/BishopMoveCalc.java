@@ -1,17 +1,15 @@
-package chess.moveCalcs;
+package chess.movecalcs;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
+import chess.*;
 
 import java.util.HashSet;
 
-public class RookMoveCalc {
+
+public class BishopMoveCalc {
     public static HashSet<ChessMove> getMove(ChessBoard board, ChessPosition pos) {
         int currX = pos.getColumn();
         int currY = pos.getRow();
-        int[][] possibleMovement = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+        int[][] possibleMovement = {{-1, 1}, {1, 1}, {1, -1}, {-1, -1}};
 
         ChessGame.TeamColor team = board.getPiece(pos).getTeamColor();
         return MoveCalc.directionalMoves(board, pos, possibleMovement, currY, currX, team);
