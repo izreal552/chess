@@ -1,4 +1,4 @@
-package chess.MoveCalcs;
+package chess.moveCalcs;
 
 import chess.*;
 
@@ -12,13 +12,14 @@ public class MoveCalc {
                 (position.getColumn() >= 1 && position.getColumn() <= 8);
     }
 
-    static HashSet<ChessMove> directionalMoves(ChessBoard board, ChessPosition pos, int[][] possible_Movement, int curr_Y, int curr_X, ChessGame.TeamColor team) {
+    static HashSet<ChessMove> directionalMoves(ChessBoard board, ChessPosition pos, int[][] possibleMovement,
+                                               int currY, int currX, ChessGame.TeamColor team) {
         HashSet<ChessMove> moves = new HashSet<>();
-        for (int[] dir : possible_Movement) {
+        for (int[] dir : possibleMovement) {
             boolean blocked = false;
             int i = 1;
             while (!blocked) {
-                ChessPosition newPos = new ChessPosition(curr_Y + dir[1] * i, curr_X + dir[0] * i);
+                ChessPosition newPos = new ChessPosition(currY + dir[1] * i, currX + dir[0] * i);
                 if (!isValid(newPos)) {
                     blocked = true;
                 } else if (board.getPiece(newPos) == null) {
@@ -36,10 +37,11 @@ public class MoveCalc {
 
     }
 
-    static HashSet<ChessMove> singleMovement(ChessBoard board, ChessPosition pos, int[][] possible_Movement, int curr_Y, int curr_X, ChessGame.TeamColor team) {
+    static HashSet<ChessMove> singleMovement(ChessBoard board, ChessPosition pos, int[][] possibleMovement,
+                                             int currY, int currX, ChessGame.TeamColor team) {
         HashSet<ChessMove> moves = new HashSet<>();
-        for (int[] move : possible_Movement) {
-            ChessPosition newPos = new ChessPosition(curr_Y + move[1], curr_X + move[0]);
+        for (int[] move : possibleMovement) {
+            ChessPosition newPos = new ChessPosition(currY + move[1], currX + move[0]);
 
             if (isValid(newPos)) {
                 ChessPiece targetPiece = board.getPiece(newPos);
