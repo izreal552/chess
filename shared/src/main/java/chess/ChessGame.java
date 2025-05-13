@@ -134,7 +134,7 @@ public class ChessGame {
                 ChessPosition pos = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(pos);
 
-                if (piece == null || piece.getTeamColor() == teamColor) continue;
+                if (piece == null || piece.getTeamColor() == teamColor) {continue;}
 
                 for (ChessMove move : piece.pieceMoves(board, pos)) {
                     if (move.getEndPosition().equals(kingPos)) {
