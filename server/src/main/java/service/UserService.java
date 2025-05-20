@@ -15,7 +15,7 @@ public class UserService {
         this.authDAO = authDAO;
     }
 
-    public AuthDAO createUser(UserData userData) throws BadRequestException{
+    public AuthData createUser(UserData userData) throws BadRequestException{
         try{
             userDAO.createUser(userData);
         } catch (DataAccessException error){
@@ -24,7 +24,7 @@ public class UserService {
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(userData.username(), authToken);
         authDAO.addAuth(authData);
-        return authDAO;
+        return authData;
     }
 
     public AuthData loginUser(UserData userData) throws UnauthorizedException{
