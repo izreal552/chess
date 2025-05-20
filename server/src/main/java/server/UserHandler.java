@@ -19,7 +19,7 @@ public class UserHandler {
     public Object register(Request request, Response response) throws BadRequestException {
         UserData userData = new Gson().fromJson(request.body(), UserData.class);
 
-        if(userData.username() == null || userData.password() == null){
+        if(userData.username() == null || userData.password() == null || userData.email() == null){
             throw new BadRequestException("No username/password given");
         }
 
@@ -35,6 +35,9 @@ public class UserHandler {
 
     public Object login(Request request, Response response) throws UnauthorizedException, BadRequestException{
         UserData userData = new Gson().fromJson(request.body(), UserData.class);
+        if(userData.username() == null || userData.password() == null){
+            throw new BadRequestException("No username/password given");
+        }
         AuthData authData= userService.loginUser(userData);
 
         response.status(200);
