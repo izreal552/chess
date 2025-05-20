@@ -104,7 +104,7 @@ public class GameService {
         } else if (Objects.equals(color, "BLACK")) {
             if (blackUser != null && !blackUser.equals(authData.username())) return false; // Spot taken by someone else
             else blackUser = authData.username();
-        } else if (color != null) throw new BadRequestException("%s is not a valid team color".formatted(color));
+        } else {throw new BadRequestException("%s is not a valid team color".formatted(color));}
 
         try {
             gameDAO.updateGame(new GameData(gameID, whiteUser, blackUser, gameData.gameName(), gameData.game()));
