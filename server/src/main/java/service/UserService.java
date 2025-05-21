@@ -54,14 +54,6 @@ public class UserService {
         authDAO.delAuth(authToken);
     }
 
-    public AuthData getAuth(String authToken) throws UnauthorizedException{
-        try{
-            return authDAO.getAuth(authToken);
-        }catch (DataAccessException error) {
-            throw new UnauthorizedException();
-        }
-    }
-
     public void clear(){
         userDAO.clear();
         authDAO.clear();

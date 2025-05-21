@@ -12,14 +12,12 @@ import java.util.HashSet;
 
 public class GameServiceTest {
     private GameService gameService;
-    private AuthDAO authDAO;
-    private GameDAO gameDAO;
     private String token;
 
     @BeforeEach
     void setup() {
-        authDAO = new MemoryAuthDAO();
-        gameDAO = new MemoryGameDAO();
+        AuthDAO authDAO = new MemoryAuthDAO();
+        GameDAO gameDAO = new MemoryGameDAO();
         gameService = new GameService(gameDAO, authDAO);
         AuthData auth = new AuthData("user", "token123");
         authDAO.addAuth(auth);
@@ -78,4 +76,13 @@ public class GameServiceTest {
     void joinGameNegative() {
         assertThrows(UnauthorizedException.class, () -> gameService.joinGame("bad-token",99, "BLACK"));
     }
+    @Test
+    void clearPositive() throws Exception {
+        int gameID = gameService.createGame(token, "Clear Test Game");
+        assertNotNull(gameService.getGame(token, gameID));
+        gameService.clear();
+        assertThrows(UnauthorizedException.class, () -> gameService.getGame(token, gameID));
+        assertThrows(UnauthorizedException.class, () -> gameService.listGames(token));
+    }
+
 }
