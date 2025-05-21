@@ -1,11 +1,10 @@
 
-package passoff.server;
+package service;
 
-import dataAccess.*;
+import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.*;
-import service.GameService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,30 +27,30 @@ public class GameServiceTest {
     }
 
     @Test
-    void listGames_Positive() {
+    void listGamesPositive() {
         HashSet<GameData> games = assertDoesNotThrow(() -> gameService.listGames(token));
         assertNotNull(games);
     }
 
     @Test
-    void listGames_Negative() {
+    void listGamesNegative() {
         assertThrows(UnauthorizedException.class, () -> gameService.listGames("bad-token"));
     }
 
     @Test
-    void getGame_Positive() throws UnauthorizedException, BadRequestException {
+    void getGamePositive() throws UnauthorizedException, BadRequestException {
         int created = gameService.createGame(token, "Test Game");
         GameData result = assertDoesNotThrow(() -> gameService.getGame(token, created));
         assertEquals("Test Game", result.gameName());
     }
 
     @Test
-    void getGame_Negative() {
+    void getGameNegative() {
         assertThrows(UnauthorizedException.class, () -> gameService.getGame("bad-token", 1));
     }
 
     @Test
-    void createGame_Positive() throws Exception {
+    void createGamePositive() throws Exception {
         String gameName = "Epic Match";
         int gameID = gameService.createGame(token, gameName);
         assertTrue(gameID > 0);
@@ -65,18 +64,18 @@ public class GameServiceTest {
     }
 
     @Test
-    void createGame_Negative() {
+    void createGameNegative() {
         assertThrows(UnauthorizedException.class, () -> gameService.createGame("bad-token", "No Game"));
     }
 
     @Test
-    void joinGame_Positive() throws UnauthorizedException, BadRequestException {
+    void joinGamePositive() throws UnauthorizedException, BadRequestException {
         int game = gameService.createGame(token, "Join Game");
         assertDoesNotThrow(() -> gameService.joinGame(token,game, "WHITE"));
     }
 
     @Test
-    void joinGame_Negative() {
+    void joinGameNegative() {
         assertThrows(UnauthorizedException.class, () -> gameService.joinGame("bad-token",99, "BLACK"));
     }
 }

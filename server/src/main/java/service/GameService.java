@@ -2,7 +2,7 @@ package service;
 
 import chess.ChessBoard;
 import chess.ChessGame;
-import dataAccess.*;
+import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 
@@ -99,11 +99,18 @@ public class GameService {
         String blackUser = gameData.blackUsername();
 
         if (Objects.equals(color, "WHITE")) {
-            if (whiteUser != null && !whiteUser.equals(authData.username())) return false; // Spot taken by someone else
-            else whiteUser = authData.username();
+            if (whiteUser != null && !whiteUser.equals(authData.username())) {
+                return false; // Spot taken by someone else
+            } else {
+                whiteUser = authData.username();
+            }
         } else if (Objects.equals(color, "BLACK")) {
-            if (blackUser != null && !blackUser.equals(authData.username())) return false; // Spot taken by someone else
-            else blackUser = authData.username();
+            if (blackUser != null && !blackUser.equals(authData.username())) {
+                return false;
+            } // Spot taken by someone else
+            else {
+                blackUser = authData.username();
+            }
         } else {throw new BadRequestException("%s is not a valid team color".formatted(color));}
 
         try {
