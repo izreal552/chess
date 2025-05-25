@@ -8,26 +8,13 @@ public class DatabaseManager {
     private static String dbUsername;
     private static String dbPassword;
     private static String connectionUrl;
+    private static boolean initialized = false;
 
     /*
      * Load the database information for the db.properties file.
      */
     static {
-        try {
-            try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
-                if (propStream == null) throw new Exception("Unable to load db.properties");
-                Properties props = new Properties();
-                props.load(propStream);
-                databaseName = props.getProperty("db.name");
-                dbUsername = props.getProperty("db.user");
-                dbPassword = props.getProperty("db.password");
-                var host = props.getProperty("db.host");
-                var port = Integer.parseInt(props.getProperty("db.port"));
-                connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException("unable to process db.properties. " + ex.getMessage());
-        }
+        loadPropertiesFromResources();
     }
 
     /**
@@ -43,6 +30,16 @@ public class DatabaseManager {
         }
     }
 
+    public static String getDatabaseName() {
+        return databaseName;
+    }
+
+    public static void initializeDatabase() throws DataAccessException {
+        if (!initialized) {
+            createDatabase();
+            initialized = true;
+        }
+    }
     /**
      * Create a connection to the database and sets the catalog based upon the
      * properties specified in db.properties. Connections to the database should
@@ -57,6 +54,7 @@ public class DatabaseManager {
      */
     static Connection getConnection() throws DataAccessException {
         try {
+            initializeDatabase();
             //do not wrap the following line with a try-with-resources
             var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
             conn.setCatalog(databaseName);
