@@ -31,14 +31,6 @@ public class SQLGameDAO implements GameDAO{
         }
     }
 
-    private String serializeGame(ChessGame game) {
-        return new Gson().toJson(game);
-    }
-
-    private ChessGame deserializeGame(String serializedGame) {
-        return new Gson().fromJson(serializedGame, ChessGame.class);
-    }
-
     @Override
     public HashSet<GameData> listGames() {
         HashSet<GameData> games = HashSet.newHashSet(16);
@@ -139,4 +131,13 @@ public class SQLGameDAO implements GameDAO{
             throw new RuntimeException(error);
         }
     }
+
+    private String serializeGame(ChessGame game) {
+        return new Gson().toJson(game);
+    }
+
+    private ChessGame deserializeGame(String serializedGame) {
+        return new Gson().fromJson(serializedGame, ChessGame.class);
+    }
+
 }
