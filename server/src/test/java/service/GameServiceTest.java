@@ -15,7 +15,7 @@ public class GameServiceTest {
     private String token;
 
     @BeforeEach
-    void setup() {
+    void setup() throws DataAccessException {
         AuthDAO authDAO = new MemoryAuthDAO();
         GameDAO gameDAO = new MemoryGameDAO();
         gameService = new GameService(gameDAO, authDAO);

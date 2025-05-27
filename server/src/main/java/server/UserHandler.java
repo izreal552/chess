@@ -27,27 +27,74 @@ public class UserHandler {
             AuthData authData = userService.createUser(userData);
             response.status(200);
             return new Gson().toJson(authData);
-        }catch (BadRequestException error){
-            response.status(403);
-            return "{ \"message\": \"Error: already taken\" }";
+        }catch (BadRequestException e) {
+            if (e.getMessage().contains("already taken")) {
+                response.status(403);
+                return "{ \"message\": \"Error: already taken\" }";
+            } else {
+                response.status(500);
+                return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
+            }
         }
+
     }
 
     public Object login(Request request, Response response) throws UnauthorizedException, BadRequestException{
-        UserData userData = new Gson().fromJson(request.body(), UserData.class);
-        if(userData.username() == null || userData.password() == null){
-            throw new BadRequestException("No username/password given");
-        }
-        AuthData authData= userService.loginUser(userData);
+        try {
+            UserData userData = new Gson().fromJson(request.body(), UserData.class);
 
-        response.status(200);
-        return new Gson().toJson(authData);
-    }
+            if (userData.username() == null || userData.password() == null) {
+                response.status(400);
+                return "{ \"message\": \"Error: bad request\" }";
+            }
+
+            try {
+                AuthData authData = userService.loginUser(userData);
+                response.status(200);
+                return new Gson().toJson(authData);
+            } catch (UnauthorizedException e) {
+                String msg = e.getMessage();
+                if (msg != null && (msg.toLowerCase().contains("invalid") || msg.toLowerCase().contains("unauthorized") || msg.toLowerCase().contains("credentials"))) {
+                    response.status(401);
+                    return "{ \"message\": \"Error: unauthorized\" }";
+                } else {
+                    response.status(500);
+                    return "{ \"message\": \"Error: " + (msg != null ? msg : "internal server error") + "\" }";
+                }
+            }
+
+        } catch (Exception e) {
+            response.status(500);
+            return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
+        }    }
 
     public Object logout(Request request, Response response) throws  UnauthorizedException{
-        String authToken = request.headers("authorization");
-        userService.logoutUser(authToken);
-        response.status(200);
-        return "{}";
+        try {
+            String authToken = request.headers("authorization");
+
+            if (authToken == null || authToken.trim().isEmpty()) {
+                response.status(401);
+                return "{ \"message\": \"Error: unauthorized\" }";
+            }
+
+            try {
+                userService.logoutUser(authToken);
+                response.status(200);
+                return "{}";
+            } catch (UnauthorizedException e) {
+                String msg = e.getMessage();
+                if (msg != null && (msg.toLowerCase().contains("unauthorized") || msg.toLowerCase().contains("invalid token"))) {
+                    response.status(401);
+                    return "{ \"message\": \"Error: unauthorized\" }";
+                } else {
+                    response.status(500);
+                    return "{ \"message\": \"Error: " + (msg != null ? msg : "internal server error") + "\" }";
+                }
+            }
+
+        } catch (Exception e) {
+            response.status(500);
+            return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
+        }
     }
 }
