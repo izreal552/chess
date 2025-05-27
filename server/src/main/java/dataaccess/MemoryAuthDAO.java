@@ -18,7 +18,7 @@ public class MemoryAuthDAO implements AuthDAO{
     }
 
     @Override
-    public void delAuth(String authToken) {
+    public void delAuth(String authToken) throws DataAccessException {
         for(AuthData authData: db){
             if(authData.authToken().equals(authToken)){
                 db.remove(authData);
@@ -40,5 +40,10 @@ public class MemoryAuthDAO implements AuthDAO{
     @Override
     public void clear() {
         db = HashSet.newHashSet(16);
+    }
+
+    @Override
+    public void addAuth(String authToken, String username) {
+        db.add(new AuthData(username, authToken));
     }
 }

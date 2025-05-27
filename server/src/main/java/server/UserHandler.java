@@ -1,7 +1,9 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import dataaccess.BadRequestException;
+import dataaccess.DataAccessException;
 import dataaccess.UnauthorizedException;
 import model.AuthData;
 import model.UserData;
@@ -27,7 +29,7 @@ public class UserHandler {
             AuthData authData = userService.createUser(userData);
             response.status(200);
             return new Gson().toJson(authData);
-        }catch (BadRequestException e) {
+        }catch (BadRequestException | DataAccessException e) {
             if (e.getMessage().contains("already taken")) {
                 response.status(403);
                 return "{ \"message\": \"Error: already taken\" }";
@@ -39,34 +41,33 @@ public class UserHandler {
 
     }
 
-    public Object login(Request request, Response response) throws UnauthorizedException, BadRequestException{
+    public Object login(Request req, Response resp) throws UnauthorizedException, BadRequestException{
         try {
-            UserData userData = new Gson().fromJson(request.body(), UserData.class);
-
-            if (userData.username() == null || userData.password() == null) {
-                response.status(400);
-                return "{ \"message\": \"Error: bad request\" }";
+            UserData userData = new Gson().fromJson(req.body(), UserData.class);
+            if (userData == null || userData.username() == null || userData.password() == null) {
+                resp.status(400);
+                return "{ \"message\": \"Error: Missing required fields\" }";
             }
 
-            try {
-                AuthData authData = userService.loginUser(userData);
-                response.status(200);
-                return new Gson().toJson(authData);
-            } catch (UnauthorizedException e) {
-                String msg = e.getMessage();
-                if (msg != null && (msg.toLowerCase().contains("invalid") || msg.toLowerCase().contains("unauthorized") || msg.toLowerCase().contains("credentials"))) {
-                    response.status(401);
-                    return "{ \"message\": \"Error: unauthorized\" }";
-                } else {
-                    response.status(500);
-                    return "{ \"message\": \"Error: " + (msg != null ? msg : "internal server error") + "\" }";
-                }
+            AuthData authData = userService.loginUser(userData);
+            resp.status(200);
+            return new Gson().toJson(authData);
+        } catch (JsonSyntaxException e) {
+            resp.status(400);
+            return "{ \"message\": \"Error: Invalid request format\" }";
+        } catch (DataAccessException e) {
+            if (e.getMessage().contains("Invalid credentials") || e.getMessage().contains("User not found")) {
+                resp.status(401);
+                return "{ \"message\": \"Error: Unauthorized\" }";
+            } else {
+                resp.status(500);
+                return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
             }
-
         } catch (Exception e) {
-            response.status(500);
-            return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
-        }    }
+            resp.status(500);
+            return "{ \"message\": \"Error: Internal server error\" }";
+        }
+    }
 
     public Object logout(Request request, Response response) throws  UnauthorizedException{
         try {

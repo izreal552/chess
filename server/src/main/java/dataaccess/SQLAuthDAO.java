@@ -40,7 +40,7 @@ public class SQLAuthDAO implements AuthDAO{
     }
 
     @Override
-    public void delAuth(String authToken) {
+    public void delAuth(String authToken) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection() ) {
             try (var statement = conn.prepareStatement("DELETE FROM auth WHERE authToken=?")) {
                 statement.setString(1, authToken);
@@ -77,6 +77,22 @@ public class SQLAuthDAO implements AuthDAO{
             }
         } catch (SQLException | DataAccessException error) {
             throw new RuntimeException(error);
+        }
+    }
+
+    @Override
+    public void addAuth(String authToken, String username) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var statement = conn.prepareStatement("INSERT INTO auth (username, authToken) VALUES(?, ?)")) {
+                statement.setString(1, username);
+                statement.setString(2, authToken);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            if (e.getMessage().contains("Duplicate entry")) {
+                throw new DataAccessException("Auth token already exists");
+            }
+            throw new DataAccessException("Database connection failed: " + e.getMessage());
         }
     }
 }

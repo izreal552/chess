@@ -28,14 +28,14 @@ public class UserServiceTest {
     }
 
     @Test
-    void createUserNegative() throws BadRequestException {
+    void createUserNegative() throws BadRequestException, DataAccessException {
         UserData user = new UserData("dupe", "pass", null);
         userService.createUser(user);
         assertThrows(BadRequestException.class, () -> userService.createUser(user));
     }
 
     @Test
-    void loginUserPositive() throws BadRequestException {
+    void loginUserPositive() throws BadRequestException, DataAccessException {
         UserData user = new UserData("user", "pass", "mail");
         userService.createUser(user);
         AuthData auth = assertDoesNotThrow(() -> userService.loginUser(user));
@@ -49,7 +49,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void logoutUserPositive() throws BadRequestException {
+    void logoutUserPositive() throws BadRequestException, DataAccessException {
         UserData user = new UserData("logout", "1234", "mail");
         AuthData auth = userService.createUser(user);
         assertDoesNotThrow(() -> userService.logoutUser(auth.authToken()));

@@ -1,5 +1,7 @@
 package service;
 
+
+import dataaccess.DataAccessException;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
@@ -15,7 +17,7 @@ public class UserService {
         this.authDAO = authDAO;
     }
 
-    public AuthData createUser(UserData userData) throws BadRequestException{
+    public AuthData createUser(UserData userData) throws BadRequestException, DataAccessException {
         try{
             userDAO.createUser(userData);
         } catch (DataAccessException error){
@@ -27,25 +29,24 @@ public class UserService {
         return authData;
     }
 
-    public AuthData loginUser(UserData userData) throws UnauthorizedException{
-        boolean userAuth;
-        try{
-            userAuth = userDAO.authUser(userData.username(), userData.password());
-        }catch(DataAccessException error){
-            throw new UnauthorizedException();
+    public AuthData loginUser(UserData userData) throws UnauthorizedException, DataAccessException, BadRequestException {
+        if (userData == null || userData.username() == null || userData.password() == null) {
+            throw new BadRequestException("Missing required fields");
         }
-        if(userAuth){
-            String authToken = UUID.randomUUID().toString();
-            AuthData authData = new AuthData(userData.username(), authToken);
-            authDAO.addAuth(authData);
-            return authData;
+
+        // throw DataAccessException
+        boolean isAuthenticated = userDAO.authUser(userData.username(), userData.password());
+        if (!isAuthenticated) {
+            throw new DataAccessException("Invalid credentials");
         }
-        else{
-            throw new UnauthorizedException();
-        }
+
+        String authToken = UUID.randomUUID().toString();
+        authDAO.addAuth(authToken, userData.username());
+
+        return new AuthData(userData.username(), authToken);
     }
 
-    public void logoutUser(String authToken) throws UnauthorizedException{
+    public void logoutUser(String authToken) throws UnauthorizedException, DataAccessException {
         try{
             authDAO.getAuth(authToken);
         }catch (DataAccessException error){
