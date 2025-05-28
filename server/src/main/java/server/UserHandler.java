@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
-import dataaccess.UnauthorizedException;
 import model.AuthData;
 import model.UserData;
 import service.UserService;
@@ -18,7 +17,7 @@ public class UserHandler {
         this.userService = userService;
     }
 
-    public Object register(Request request, Response response) throws BadRequestException {
+    public Object register(Request request, Response response) throws DataAccessException {
         UserData userData = new Gson().fromJson(request.body(), UserData.class);
 
         if (userData.username() == null || userData.password() == null || userData.email() == null) {
@@ -44,7 +43,7 @@ public class UserHandler {
 
     }
 
-    public Object login(Request req, Response resp) {
+    public Object login(Request req, Response resp){
         try {
             UserData userData = new Gson().fromJson(req.body(), UserData.class);
             if (userData == null || userData.username() == null || userData.password() == null) {

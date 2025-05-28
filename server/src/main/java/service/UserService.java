@@ -17,7 +17,7 @@ public class UserService {
         this.authDAO = authDAO;
     }
 
-    public AuthData createUser(UserData userData) throws BadRequestException, DataAccessException {
+    public AuthData createUser(UserData userData) throws DataAccessException {
         try{
             userDAO.createUser(userData);
         } catch (DataAccessException error){
@@ -29,7 +29,7 @@ public class UserService {
         return authData;
     }
 
-    public AuthData loginUser(UserData userData) throws UnauthorizedException, DataAccessException, BadRequestException {
+    public AuthData loginUser(UserData userData) throws DataAccessException{
         if (userData == null || userData.username() == null || userData.password() == null) {
             throw new BadRequestException("Missing required fields");
         }

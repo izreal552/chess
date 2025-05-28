@@ -6,9 +6,7 @@ import dataaccess.DataAccessException;
 import dataaccess.UnauthorizedException;
 import model.GameData;
 import model.GamesList;
-import org.eclipse.jetty.server.Authentication;
 import service.GameService;
-import service.UserService;
 import spark.Request;
 import spark.Response;
 
@@ -18,7 +16,7 @@ public class GameHandler {
         this.gameService = gameService;
     }
 
-    public Object listGames(Request request, Response response) throws UnauthorizedException{
+    public Object listGames(Request request, Response response) throws DataAccessException{
         try {
             String authToken = request.headers("authorization");
 
@@ -48,41 +46,46 @@ public class GameHandler {
         }
     }
 
-    public Object createGame(Request request, Response response) throws BadRequestException, UnauthorizedException{
+    public Object createGame(Request request, Response response) throws DataAccessException{
         try {
-            if (!request.body().contains("\"gameName\":")) {
-                response.status(400);
-                return "{ \"message\": \"Error: bad request\" }";
-            }
-            GameData gameData = new Gson().fromJson(request.body(), GameData.class);
             String authToken = request.headers("authorization");
-
             if (authToken == null || authToken.trim().isEmpty()) {
-                response.status(401);
-                return "{ \"message\": \"Error: unauthorized\" }";
+                throw new UnauthorizedException("Missing or empty authorization token");
             }
 
-            try {
-                int gameID = gameService.createGame(authToken, gameData.gameName());
-                response.status(200);
-                return "{ \"gameID\": %d }".formatted(gameID);
-            } catch (DataAccessException e) {
-                if (e.getMessage() != null && e.getMessage().toLowerCase().contains("already taken")) {
-                    response.status(403);
-                    return "{ \"message\": \"Error: already taken\" }";
-                } else {
-                    response.status(500);
-                    return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
-                }
+            GameData gameData = new Gson().fromJson(request.body(), GameData.class);
+            if (gameData == null || gameData.gameName() == null || gameData.gameName().isBlank()) {
+                throw new BadRequestException("Missing or invalid 'gameName'");
+            }
+
+            int gameID = gameService.createGame(authToken, gameData.gameName());
+            response.status(200);
+            return "{ \"gameID\": %d }".formatted(gameID);
+
+        } catch (BadRequestException e) {
+            response.status(400);
+            return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
+
+        } catch (UnauthorizedException e) {
+            response.status(401);
+            return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
+
+        } catch (DataAccessException e) {
+            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("already taken")) {
+                response.status(403);
+                return "{ \"message\": \"Error: already taken\" }";
+            } else {
+                response.status(500);
+                return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
             }
 
         } catch (Exception e) {
             response.status(500);
-            return "{ \"message\": \"Error: " + (e.getMessage() != null ? e.getMessage() : "internal server error") + "\" }";
+            return "{ \"message\": \"Error: Internal server error\" }";
         }
     }
 
-    public Object joinGame(Request req, Response resp) throws BadRequestException, UnauthorizedException {
+    public Object joinGame(Request req, Response resp) throws DataAccessException {
         try {
             if (!req.body().contains("\"gameID\":")) {
                 resp.status(400);

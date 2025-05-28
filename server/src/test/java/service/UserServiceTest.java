@@ -10,13 +10,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UserServiceTest {
     private UserService userService;
-    private UserDAO userDAO;
-    private AuthDAO authDAO;
 
     @BeforeEach
     void setup() {
-        userDAO = new MemoryUserDAO();  // Assuming in-memory test DAO
-        authDAO = new MemoryAuthDAO();
+        UserDAO userDAO = new MemoryUserDAO();  // Assuming in-memory test DAO
+        AuthDAO authDAO = new MemoryAuthDAO();
         userService = new UserService(userDAO, authDAO);
     }
 
@@ -28,14 +26,14 @@ public class UserServiceTest {
     }
 
     @Test
-    void createUserNegative() throws BadRequestException, DataAccessException {
+    void createUserNegative() throws  DataAccessException {
         UserData user = new UserData("dupe", "pass", null);
         userService.createUser(user);
         assertThrows(BadRequestException.class, () -> userService.createUser(user));
     }
 
     @Test
-    void loginUserPositive() throws BadRequestException, DataAccessException {
+    void loginUserPositive() throws DataAccessException {
         UserData user = new UserData("user", "pass", "mail");
         userService.createUser(user);
         AuthData auth = assertDoesNotThrow(() -> userService.loginUser(user));
@@ -49,7 +47,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void logoutUserPositive() throws BadRequestException, DataAccessException {
+    void logoutUserPositive() throws  DataAccessException {
         UserData user = new UserData("logout", "1234", "mail");
         AuthData auth = userService.createUser(user);
         assertDoesNotThrow(() -> userService.logoutUser(auth.authToken()));
