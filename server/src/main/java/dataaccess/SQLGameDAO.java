@@ -60,7 +60,8 @@ public class SQLGameDAO implements GameDAO{
     @Override
     public void createGame(GameData game) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            try (var statement = conn.prepareStatement("INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, chessGame) VALUES(?, ?, ?, ?, ?)")) {
+            try (var statement = conn.prepareStatement("INSERT INTO game (gameID, whiteUsername, blackUsername, " +
+                    "gameName, chessGame) VALUES(?, ?, ?, ?, ?)")) {
                 statement.setInt(1, game.gameID());
                 statement.setString(2, game.whiteUsername());
                 statement.setString(3, game.blackUsername());
@@ -76,7 +77,8 @@ public class SQLGameDAO implements GameDAO{
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            try (var statement = conn.prepareStatement("SELECT whiteUsername, blackUsername, gameName, chessGame FROM game WHERE gameID=?")) {
+            try (var statement = conn.prepareStatement("SELECT whiteUsername, blackUsername, gameName, " +
+                    "chessGame FROM game WHERE gameID=?")) {
                 statement.setInt(1, gameID);
                 try (var results = statement.executeQuery()) {
                     results.next();
@@ -109,14 +111,17 @@ public class SQLGameDAO implements GameDAO{
     @Override
     public void updateGame(GameData game) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            try (var statement = conn.prepareStatement("UPDATE game SET whiteUsername=?, blackUsername=?, gameName=?, chessGame=? WHERE gameID=?")) {
+            try (var statement = conn.prepareStatement("UPDATE game SET whiteUsername=?, blackUsername=?, " +
+                    "gameName=?, chessGame=? WHERE gameID=?")) {
                 statement.setString(1, game.whiteUsername());
                 statement.setString(2, game.blackUsername());
                 statement.setString(3, game.gameName());
                 statement.setString(4, serializeGame(game.game()));
                 statement.setInt(5, game.gameID());
                 int rowsUpdated = statement.executeUpdate();
-                if (rowsUpdated == 0) throw new DataAccessException("Item requested to be updated not found");
+                if(rowsUpdated == 0) {
+                    throw new DataAccessException("Item requested to be updated not found");
+                }
             }
         } catch (SQLException error) {
             throw new DataAccessException(error.getMessage());
