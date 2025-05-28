@@ -10,6 +10,8 @@ import service.GameService;
 import spark.Request;
 import spark.Response;
 
+import java.util.HashSet;
+
 public class GameHandler {
     GameService gameService;
     public GameHandler(GameService gameService){
@@ -19,30 +21,20 @@ public class GameHandler {
     public Object listGames(Request request, Response response) throws DataAccessException{
         try {
             String authToken = request.headers("authorization");
-
-            if (authToken == null || authToken.trim().isEmpty()) {
+            HashSet<GameData> games = gameService.listGames(authToken);
+            response.status(200);
+            return "{ \"games\": %s}".formatted(new Gson().toJson(games));
+        } catch (DataAccessException e) {
+            if (e.getMessage().toLowerCase().contains("unauthorized")) {
                 response.status(401);
-                return "{ \"message\": \"Error: unauthorized\" }";
+                return "{ \"message\": \"Error: Unauthorized\" }";
+            } else {
+                response.status(500);
+                return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
             }
-
-            try {
-                GamesList gameList = new GamesList(gameService.listGames(authToken));
-                response.status(200);
-                return new Gson().toJson(gameList);
-            } catch (DataAccessException e) {
-                String msg = e.getMessage();
-                if (msg != null && msg.toLowerCase().contains("unauthorized")) {
-                    response.status(401);
-                    return "{ \"message\": \"Error: unauthorized\" }";
-                } else {
-                    response.status(500);
-                    return "{ \"message\": \"Error: " + msg + "\" }";
-                }
-            }
-
         } catch (Exception e) {
             response.status(500);
-            return "{ \"message\": \"Error: " + (e.getMessage() != null ? e.getMessage() : "internal server error") + "\" }";
+            return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
         }
     }
 
@@ -85,7 +77,7 @@ public class GameHandler {
         }
     }
 
-    public Object joinGame(Request req, Response resp) throws DataAccessException {
+    public Object joinGame(Request req, Response resp){
         try {
             if (!req.body().contains("\"gameID\":")) {
                 resp.status(400);

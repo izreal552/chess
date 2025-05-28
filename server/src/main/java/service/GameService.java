@@ -32,7 +32,7 @@ public class GameService {
         try{
             authDAO.getAuth(authToken);
         }catch (DataAccessException error){
-            throw new UnauthorizedException("Unauthorized");
+            throw new DataAccessException("Does not exist");
         }
         try{
             return gameDAO.getGame(gameID);
@@ -42,27 +42,13 @@ public class GameService {
     }
 
     public int createGame(String authToken, String gameName) throws DataAccessException {
-        try {
-            authDAO.getAuth(authToken);
-        } catch (DataAccessException e) {
-            throw new UnauthorizedException("Unauthorized");
-        }
-
+        authDAO.getAuth(authToken);
         int gameID;
-        do { // Get random gameIDs until the gameID is not already in use
-            gameID = ThreadLocalRandom.current().nextInt(1, 10000);
+        do {
+            gameID = ThreadLocalRandom.current().nextInt(1, 10000); // in case the game ID is in use, will find another one
         } while (gameDAO.gameExists(gameID));
 
-        try {
-            ChessGame game = new ChessGame();
-            ChessBoard board = new ChessBoard();
-            board.resetBoard();
-            game.setBoard(board);
-            gameDAO.createGame(new GameData(gameID, null, null, gameName, game));
-        } catch (DataAccessException e) {
-            throw new BadRequestException(e.getMessage());
-        }
-
+        gameDAO.createGame(new GameData(gameID, null, null, gameName, null));
         return gameID;
     }
 
