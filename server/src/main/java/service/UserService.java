@@ -49,10 +49,14 @@ public class UserService {
     public void logoutUser(String authToken) throws UnauthorizedException, DataAccessException {
         try{
             authDAO.getAuth(authToken);
+            if (authToken == null || authToken.isBlank()) {
+                throw new DataAccessException("does not exist");
+            }
         }catch (DataAccessException error){
-            throw new UnauthorizedException();
+            throw new DataAccessException("Database operation failed: " + error.getMessage());
         }
         authDAO.delAuth(authToken);
+
     }
 
     public void clear(){

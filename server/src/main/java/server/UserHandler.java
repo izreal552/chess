@@ -14,34 +14,37 @@ import spark.Response;
 public class UserHandler {
     UserService userService;
 
-    public UserHandler(UserService userService){
+    public UserHandler(UserService userService) {
         this.userService = userService;
     }
 
     public Object register(Request request, Response response) throws BadRequestException {
         UserData userData = new Gson().fromJson(request.body(), UserData.class);
 
-        if(userData.username() == null || userData.password() == null || userData.email() == null){
+        if (userData.username() == null || userData.password() == null || userData.email() == null) {
             throw new BadRequestException("No username/password given");
         }
 
-        try{
+        try {
             AuthData authData = userService.createUser(userData);
             response.status(200);
             return new Gson().toJson(authData);
-        }catch (BadRequestException | DataAccessException e) {
-            if (e.getMessage().contains("already taken")) {
+        } catch (BadRequestException e) {
+            if (e.getMessage().contains("already exists")) {
                 response.status(403);
                 return "{ \"message\": \"Error: already taken\" }";
             } else {
                 response.status(500);
                 return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
             }
+        } catch (DataAccessException e) {
+            response.status(500);
+            return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
         }
 
     }
 
-    public Object login(Request req, Response resp) throws UnauthorizedException, BadRequestException{
+    public Object login(Request req, Response resp) {
         try {
             UserData userData = new Gson().fromJson(req.body(), UserData.class);
             if (userData == null || userData.username() == null || userData.password() == null) {
@@ -69,7 +72,7 @@ public class UserHandler {
         }
     }
 
-    public Object logout(Request request, Response response) throws  UnauthorizedException{
+    public Object logout(Request request, Response response) {
         try {
             String authToken = request.headers("authorization");
 
@@ -82,9 +85,9 @@ public class UserHandler {
                 userService.logoutUser(authToken);
                 response.status(200);
                 return "{}";
-            } catch (UnauthorizedException e) {
+            } catch (DataAccessException e) {
                 String msg = e.getMessage();
-                if (msg != null && (msg.toLowerCase().contains("unauthorized") || msg.toLowerCase().contains("invalid token"))) {
+                if (msg != null && (e.getMessage().contains("does not exist") || e.getMessage().contains("database operation"))) {
                     response.status(401);
                     return "{ \"message\": \"Error: unauthorized\" }";
                 } else {
@@ -92,7 +95,6 @@ public class UserHandler {
                     return "{ \"message\": \"Error: " + (msg != null ? msg : "internal server error") + "\" }";
                 }
             }
-
         } catch (Exception e) {
             response.status(500);
             return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
