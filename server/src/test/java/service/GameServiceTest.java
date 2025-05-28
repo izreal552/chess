@@ -15,6 +15,8 @@ public class GameServiceTest {
     private SQLUserDAO userDAO;
     private SQLGameDAO gameDAO;
     private SQLAuthDAO authDAO;
+    private String token;
+
 
     @BeforeEach
     public void setUp(){
@@ -72,6 +74,21 @@ public class GameServiceTest {
         assertThrows(BadRequestException.class, () -> gameService.getGame(auth.authToken(), 9999));
     }
 
+    @Test
+    void joinGamePositive() throws DataAccessException {
+        UserData user = new UserData("joinUser", "password", "email");
+        AuthData auth = userService.createUser(user);
+        String token = auth.authToken();
+        int gameID = gameService.createGame(token, "Join Game");
+        assertDoesNotThrow(() -> gameService.joinGame(token, gameID, "WHITE"));
+    }
+
+    @Test
+    void joinGameNegative() {
+        assertThrows(UnauthorizedException.class, () -> gameService.joinGame("bad-token",
+                99, "BLACK"));
+    }
+    
     @Test
     public void testClearPositive() throws DataAccessException {
         userDAO.clear();

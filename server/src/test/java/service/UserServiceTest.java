@@ -13,7 +13,7 @@ public class UserServiceTest {
     private SQLAuthDAO authDAO;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws DataAccessException {
         userDAO = new SQLUserDAO();
         authDAO = new SQLAuthDAO();
 
@@ -24,21 +24,21 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testCreateUserPositive() throws DataAccessException {
+    void CreateUserPositive() throws DataAccessException {
         UserData user = new UserData("user1", "pass", "email");
         AuthData auth = userService.createUser(user);
         assertNotNull(auth.authToken());
     }
 
     @Test
-    public void testCreateUserNegative() {
+    void CreateUserNegative() {
         UserData user = new UserData("user1", "pass", "email");
         assertDoesNotThrow(() -> userService.createUser(user));
         assertThrows(BadRequestException.class, () -> userService.createUser(user));
     }
 
     @Test
-    public void testLoginUserPositive() throws DataAccessException {
+    void LoginUserPositive() throws DataAccessException {
         UserData user = new UserData("user2", "pass", "email");
         userService.createUser(user);
         AuthData auth = userService.loginUser(user);
@@ -46,22 +46,25 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testLoginUserNegative() {
+    void LoginUserNegative() {
         UserData user = new UserData("user3", "wrong", "email");
         assertThrows(DataAccessException.class, () -> userService.loginUser(user));
     }
 
     @Test
-    public void testLogoutUserPositive() throws DataAccessException {
+    void LogoutUserPositive() throws DataAccessException {
         UserData user = new UserData("user4", "pass", "email");
         AuthData auth = userService.createUser(user);
         assertDoesNotThrow(() -> userService.logoutUser(auth.authToken()));
     }
+    
+    @Test
+    void logoutUserNegative() {
+        assertThrows(UnauthorizedException.class, () -> userService.logoutUser("fake-token"));
+    }
 
     @Test
-    public void testClearPositive(){
-        userDAO.clear();
-        authDAO.clear();
-        assertThrows(UnauthorizedException.class, () -> userService.logoutUser("some_token"));
+    void clearPositive() {
+        assertDoesNotThrow(() -> userService.clear());
     }
 }
