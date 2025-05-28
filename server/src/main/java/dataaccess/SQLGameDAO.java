@@ -152,7 +152,8 @@ public class SQLGameDAO implements GameDAO{
     @Override
     public void createGame(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
         try (var conn = DatabaseManager.getConnection()) {
-            try (var statement = conn.prepareStatement("INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, chessGame) VALUES(?, ?, ?, ?, ?)"))
+            try (var statement = conn.prepareStatement("INSERT INTO game (gameID, whiteUsername, blackUsername, " +
+                    "gameName, chessGame) VALUES(?, ?, ?, ?, ?)"))
             {
                 statement.setInt(1, gameID);
                 statement.setString(2, whiteUsername);
