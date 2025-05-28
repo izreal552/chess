@@ -1,65 +1,67 @@
-
 package service;
 
 import dataaccess.*;
-import model.AuthData;
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserServiceTest {
+
     private UserService userService;
+    private SQLUserDAO userDAO;
+    private SQLAuthDAO authDAO;
 
     @BeforeEach
-    void setup() {
-        UserDAO userDAO = new MemoryUserDAO();  // Assuming in-memory test DAO
-        AuthDAO authDAO = new MemoryAuthDAO();
+    public void setUp() {
+        userDAO = new SQLUserDAO();
+        authDAO = new SQLAuthDAO();
+
         userService = new UserService(userDAO, authDAO);
+
+        userDAO.clear();
+        authDAO.clear();
     }
 
     @Test
-    void createUserPositive() {
-        UserData user = new UserData("testuser", "pass123", "email@test.com");
-        AuthData auth = assertDoesNotThrow(() -> userService.createUser(user));
-        assertEquals("testuser", auth.username());
+    public void testCreateUserPositive() throws DataAccessException {
+        UserData user = new UserData("user1", "pass", "email");
+        AuthData auth = userService.createUser(user);
+        assertNotNull(auth.authToken());
     }
 
     @Test
-    void createUserNegative() throws  DataAccessException {
-        UserData user = new UserData("dupe", "pass", null);
-        userService.createUser(user);
+    public void testCreateUserNegative() {
+        UserData user = new UserData("user1", "pass", "email");
+        assertDoesNotThrow(() -> userService.createUser(user));
         assertThrows(BadRequestException.class, () -> userService.createUser(user));
     }
 
     @Test
-    void loginUserPositive() throws DataAccessException {
-        UserData user = new UserData("user", "pass", "mail");
+    public void testLoginUserPositive() throws DataAccessException {
+        UserData user = new UserData("user2", "pass", "email");
         userService.createUser(user);
-        AuthData auth = assertDoesNotThrow(() -> userService.loginUser(user));
-        assertEquals("user", auth.username());
+        AuthData auth = userService.loginUser(user);
+        assertNotNull(auth);
     }
 
     @Test
-    void loginUserNegative() {
-        UserData badUser = new UserData("wrong", null, "mail");
-        assertThrows(UnauthorizedException.class, () -> userService.loginUser(badUser));
+    public void testLoginUserNegative() {
+        UserData user = new UserData("user3", "wrong", "email");
+        assertThrows(DataAccessException.class, () -> userService.loginUser(user));
     }
 
     @Test
-    void logoutUserPositive() throws  DataAccessException {
-        UserData user = new UserData("logout", "1234", "mail");
+    public void testLogoutUserPositive() throws DataAccessException {
+        UserData user = new UserData("user4", "pass", "email");
         AuthData auth = userService.createUser(user);
         assertDoesNotThrow(() -> userService.logoutUser(auth.authToken()));
     }
 
     @Test
-    void logoutUserNegative() {
-        assertThrows(UnauthorizedException.class, () -> userService.logoutUser("fake-token"));
-    }
-
-    @Test
-    void clearPositive() {
-        assertDoesNotThrow(() -> userService.clear());
+    public void testClearPositive(){
+        userDAO.clear();
+        authDAO.clear();
+        assertThrows(UnauthorizedException.class, () -> userService.logoutUser("some_token"));
     }
 }

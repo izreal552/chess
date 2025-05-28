@@ -1,7 +1,6 @@
 package service;
 
-import chess.ChessBoard;
-import chess.ChessGame;
+
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
@@ -62,7 +61,7 @@ public class GameService {
         try {
             authData = authDAO.getAuth(authToken);
         } catch (DataAccessException e) {
-            System.out.println(e);
+//            System.out.println(e);
             if(e.getMessage().contains("Auth")) {
                 throw new UnauthorizedException("auth");
             }

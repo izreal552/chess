@@ -5,7 +5,6 @@ import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
 import dataaccess.UnauthorizedException;
 import model.GameData;
-import model.GamesList;
 import service.GameService;
 import spark.Request;
 import spark.Response;

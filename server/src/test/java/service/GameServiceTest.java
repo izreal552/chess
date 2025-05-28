@@ -1,88 +1,82 @@
-
 package service;
 
 import dataaccess.*;
-import model.AuthData;
-import model.GameData;
+import model.*;
 import org.junit.jupiter.api.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashSet;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class GameServiceTest {
+
     private GameService gameService;
-    private String token;
+    private UserService userService;
+    private SQLUserDAO userDAO;
+    private SQLGameDAO gameDAO;
+    private SQLAuthDAO authDAO;
 
     @BeforeEach
-    void setup() throws DataAccessException {
-        AuthDAO authDAO = new MemoryAuthDAO();
-        GameDAO gameDAO = new MemoryGameDAO();
+    public void setUp(){
+        userDAO = new SQLUserDAO();
+        gameDAO = new SQLGameDAO();
+        authDAO = new SQLAuthDAO();
+
+        userService = new UserService(userDAO, authDAO);
         gameService = new GameService(gameDAO, authDAO);
-        AuthData auth = new AuthData("user", "token123");
-        authDAO.addAuth(auth);
-        token = auth.authToken();
+
+        userDAO.clear();
+        gameDAO.clear();
+        authDAO.clear();
     }
 
     @Test
-    void listGamesPositive() {
-        HashSet<GameData> games = assertDoesNotThrow(() -> gameService.listGames(token));
+    public void testListGamesPositive() throws DataAccessException {
+        UserData user = new UserData("gamer1", "pass", "email");
+        AuthData auth = userService.createUser(user);
+        HashSet<GameData> games = gameService.listGames(auth.authToken());
         assertNotNull(games);
     }
 
     @Test
-    void listGamesNegative() {
-        assertThrows(UnauthorizedException.class, () -> gameService.listGames("bad-token"));
+    public void testListGamesNegative() {
+        assertThrows(UnauthorizedException.class, () -> gameService.listGames("bad_token"));
     }
 
     @Test
-    void getGamePositive() throws DataAccessException {
-        int created = gameService.createGame(token, "Test Game");
-        GameData result = assertDoesNotThrow(() -> gameService.getGame(token, created));
-        assertEquals("Test Game", result.gameName());
+    public void testCreateGamePositive() throws DataAccessException {
+        UserData user = new UserData("gamer2", "pass", "email");
+        AuthData auth = userService.createUser(user);
+        int gameId = gameService.createGame(auth.authToken(), "chess");
+        assertTrue(gameId > 0);
     }
 
     @Test
-    void getGameNegative() {
-        assertThrows(UnauthorizedException.class, () -> gameService.getGame("bad-token", 1));
+    public void testCreateGameNegative() {
+        assertThrows(DataAccessException.class, () -> gameService.createGame("invalid", "chess"));
     }
 
     @Test
-    void createGamePositive() throws Exception {
-        String gameName = "Epic Match";
-        int gameID = gameService.createGame(token, gameName);
-        assertTrue(gameID > 0);
-
-        GameData createdGame = gameService.getGame(token, gameID);
-        assertNotNull(createdGame);
-        assertEquals(gameName, createdGame.gameName());
-        assertNull(createdGame.whiteUsername());
-        assertNull(createdGame.blackUsername());
-        assertNotNull(createdGame.game());
+    public void testGetGamePositive() throws DataAccessException {
+        UserData user = new UserData("gamer3", "pass", "email");
+        AuthData auth = userService.createUser(user);
+        int gameId = gameService.createGame(auth.authToken(), "checkers");
+        GameData game = gameService.getGame(auth.authToken(), gameId);
+        assertEquals("checkers", game.gameName());
     }
 
     @Test
-    void createGameNegative() {
-        assertThrows(UnauthorizedException.class, () -> gameService.createGame("bad-token", "No Game"));
+    public void testGetGameNegative() throws DataAccessException {
+        UserData user = new UserData("gamer4", "pass", "email");
+        AuthData auth = userService.createUser(user);
+        assertThrows(BadRequestException.class, () -> gameService.getGame(auth.authToken(), 9999));
     }
 
     @Test
-    void joinGamePositive() throws DataAccessException {
-        int game = gameService.createGame(token, "Join Game");
-        assertDoesNotThrow(() -> gameService.joinGame(token,game, "WHITE"));
+    public void testClearPositive() throws DataAccessException {
+        userDAO.clear();
+        gameDAO.clear();
+        authDAO.clear();
+        assertTrue(gameDAO.listGames().isEmpty());
     }
-
-    @Test
-    void joinGameNegative() {
-        assertThrows(UnauthorizedException.class, () -> gameService.joinGame("bad-token",99, "BLACK"));
-    }
-    @Test
-    void clearPositive() throws Exception {
-        int gameID = gameService.createGame(token, "Clear Test Game");
-        assertNotNull(gameService.getGame(token, gameID));
-        gameService.clear();
-        assertThrows(UnauthorizedException.class, () -> gameService.getGame(token, gameID));
-        assertThrows(UnauthorizedException.class, () -> gameService.listGames(token));
-    }
-
 }

@@ -55,7 +55,7 @@ public class UserService {
             authDAO.getAuth(authToken);
             authDAO.delAuth(authToken);
         } catch (DataAccessException e) {
-            throw new DataAccessException("Database operation failed: " + e.getMessage());
+            throw new UnauthorizedException("Database operation failed: " + e.getMessage());
         }
     }
 
