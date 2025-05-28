@@ -24,12 +24,9 @@ public class GameHandler {
             response.status(200);
             return "{ \"games\": %s}".formatted(new Gson().toJson(games));
         } catch (UnauthorizedException e) {
-            System.out.println("Caught");
             if (e.getMessage().toLowerCase().contains("unauthorized") || e.getMessage().toLowerCase().contains("invalid")) {
-                System.out.println("invalid");
                 throw new UnauthorizedException("unauthorized");
             } else {
-                System.out.println("ELSE");
                 response.status(500);
                 return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
             }

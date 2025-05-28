@@ -55,4 +55,18 @@ public class MemoryUserDAO implements UserDAO{
     public void clear() {
         db = HashSet.newHashSet(16);
     }
+
+    @Override
+    public void createUser(String username, String password, String email) throws DataAccessException {
+        try {
+            getUser(username);
+        }
+        catch (DataAccessException e) {
+            db.add(new UserData(username, password, email));
+            return;
+        }
+
+        throw new DataAccessException("User already exists: " + username);
+
+    }
 }

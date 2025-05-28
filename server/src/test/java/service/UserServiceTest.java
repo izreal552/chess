@@ -13,7 +13,7 @@ public class UserServiceTest {
     private SQLAuthDAO authDAO;
 
     @BeforeEach
-    public void setUp() throws DataAccessException {
+    public void setUp(){
         userDAO = new SQLUserDAO();
         authDAO = new SQLAuthDAO();
 
@@ -24,21 +24,21 @@ public class UserServiceTest {
     }
 
     @Test
-    void CreateUserPositive() throws DataAccessException {
+    void createUserPositive() throws DataAccessException {
         UserData user = new UserData("user1", "pass", "email");
         AuthData auth = userService.createUser(user);
         assertNotNull(auth.authToken());
     }
 
     @Test
-    void CreateUserNegative() {
+    void createUserNegative() {
         UserData user = new UserData("user1", "pass", "email");
         assertDoesNotThrow(() -> userService.createUser(user));
         assertThrows(BadRequestException.class, () -> userService.createUser(user));
     }
 
     @Test
-    void LoginUserPositive() throws DataAccessException {
+    void loginUserPositive() throws DataAccessException {
         UserData user = new UserData("user2", "pass", "email");
         userService.createUser(user);
         AuthData auth = userService.loginUser(user);
@@ -46,13 +46,13 @@ public class UserServiceTest {
     }
 
     @Test
-    void LoginUserNegative() {
+    void loginUserNegative() {
         UserData user = new UserData("user3", "wrong", "email");
         assertThrows(DataAccessException.class, () -> userService.loginUser(user));
     }
 
     @Test
-    void LogoutUserPositive() throws DataAccessException {
+    void logoutUserPositive() throws DataAccessException {
         UserData user = new UserData("user4", "pass", "email");
         AuthData auth = userService.createUser(user);
         assertDoesNotThrow(() -> userService.logoutUser(auth.authToken()));

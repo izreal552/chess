@@ -84,4 +84,21 @@ public class SQLUserDAO implements UserDAO{
             throw new RuntimeException(error);
         }
     }
+    @Override
+    public void createUser(String username, String password, String email) throws DataAccessException {
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var statement = conn.prepareStatement("INSERT INTO user (username, password, email) VALUES(?, ?, ?)")) {
+                statement.setString(1, username);
+                statement.setString(2, hashedPassword);
+                statement.setString(3, email);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            if (e.getMessage().contains("Duplicate entry")) {
+                throw new DataAccessException("Username already taken");
+            }
+            throw new DataAccessException("failed to get connection: " + e.getMessage());
+        }
+    }
 }

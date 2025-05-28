@@ -34,7 +34,6 @@ public class UserService {
             throw new BadRequestException("Missing required fields");
         }
 
-        // throw DataAccessException
         boolean isAuthenticated = userDAO.authUser(userData.username(), userData.password());
         if (!isAuthenticated) {
             throw new DataAccessException("Invalid credentials");

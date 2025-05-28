@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.GameData;
 
 import java.util.HashSet;
@@ -54,5 +55,10 @@ public class MemoryGameDAO implements GameDAO {
     @Override
     public void clear() {
         db = HashSet.newHashSet(16);
+    }
+
+    @Override
+    public void createGame(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
+        db.add(new GameData(gameID, whiteUsername, blackUsername, gameName, game));
     }
 }

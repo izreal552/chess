@@ -25,7 +25,6 @@ public class GameService {
             if(error.getMessage().contains("failed")) {
                 throw new UnauthorizedException("failed");
             }
-//            System.out.println(error);
             throw new UnauthorizedException("invalid");
         }
         return gameDAO.listGames();

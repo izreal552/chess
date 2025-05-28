@@ -149,4 +149,20 @@ public class SQLGameDAO implements GameDAO{
         return new Gson().fromJson(serializedGame, ChessGame.class);
     }
 
+    @Override
+    public void createGame(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var statement = conn.prepareStatement("INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, chessGame) VALUES(?, ?, ?, ?, ?)"))
+            {
+                statement.setInt(1, gameID);
+                statement.setString(2, whiteUsername);
+                statement.setString(3, blackUsername);
+                statement.setString(4, gameName);
+                statement.setString(5, serializeGame(game));
+                statement.executeUpdate();
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
