@@ -46,17 +46,17 @@ public class UserService {
         return new AuthData(userData.username(), authToken);
     }
 
-    public void logoutUser(String authToken) throws UnauthorizedException, DataAccessException {
-        try{
-            authDAO.getAuth(authToken);
-            if (authToken == null || authToken.isBlank()) {
-                throw new DataAccessException("does not exist");
-            }
-        }catch (DataAccessException error){
-            throw new DataAccessException("Database operation failed: " + error.getMessage());
+    public void logoutUser(String authToken) throws DataAccessException {
+        if (authToken == null || authToken.isBlank()) {
+            throw new DataAccessException("Missing authorization token");
         }
-        authDAO.delAuth(authToken);
 
+        try {
+            authDAO.getAuth(authToken);
+            authDAO.delAuth(authToken);
+        } catch (DataAccessException e) {
+            throw new DataAccessException("Database operation failed: " + e.getMessage());
+        }
     }
 
     public void clear(){

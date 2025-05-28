@@ -41,13 +41,16 @@ public class SQLAuthDAO implements AuthDAO{
 
     @Override
     public void delAuth(String authToken) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection() ) {
+        try (Connection conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement("DELETE FROM auth WHERE authToken=?")) {
                 statement.setString(1, authToken);
-                statement.executeUpdate();
+                int rowsAffected = statement.executeUpdate();
+                if (rowsAffected == 0) {
+                    throw new DataAccessException("Token not found");
+                }
             }
-        } catch (SQLException | DataAccessException error) {
-            throw new RuntimeException(error);
+        } catch (SQLException e) {
+            throw new DataAccessException("Database connection failed: " + e.getMessage());
         }
     }
 

@@ -75,7 +75,6 @@ public class UserHandler {
     public Object logout(Request request, Response response) {
         try {
             String authToken = request.headers("authorization");
-
             if (authToken == null || authToken.trim().isEmpty()) {
                 response.status(401);
                 return "{ \"message\": \"Error: unauthorized\" }";

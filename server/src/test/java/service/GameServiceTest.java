@@ -36,7 +36,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void getGamePositive() throws UnauthorizedException, BadRequestException {
+    void getGamePositive() throws DataAccessException {
         int created = gameService.createGame(token, "Test Game");
         GameData result = assertDoesNotThrow(() -> gameService.getGame(token, created));
         assertEquals("Test Game", result.gameName());
@@ -67,7 +67,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void joinGamePositive() throws UnauthorizedException, BadRequestException {
+    void joinGamePositive() throws DataAccessException {
         int game = gameService.createGame(token, "Join Game");
         assertDoesNotThrow(() -> gameService.joinGame(token,game, "WHITE"));
     }

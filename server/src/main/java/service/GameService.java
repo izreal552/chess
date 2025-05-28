@@ -19,20 +19,20 @@ public class GameService {
         this.authDAO = authDAO;
     }
 
-    public HashSet<GameData> listGames(String authToken) throws UnauthorizedException{
+    public HashSet<GameData> listGames(String authToken) throws DataAccessException{
         try{
             authDAO.getAuth(authToken);
         } catch (DataAccessException error) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException("Unauthorized");
         }
         return gameDAO.listGames();
     }
 
-    public GameData getGame(String authToken, int gameID) throws UnauthorizedException, BadRequestException {
+    public GameData getGame(String authToken, int gameID) throws DataAccessException {
         try{
             authDAO.getAuth(authToken);
         }catch (DataAccessException error){
-            throw new UnauthorizedException();
+            throw new UnauthorizedException("Unauthorized");
         }
         try{
             return gameDAO.getGame(gameID);
@@ -41,11 +41,11 @@ public class GameService {
         }
     }
 
-    public int createGame(String authToken, String gameName) throws UnauthorizedException, BadRequestException {
+    public int createGame(String authToken, String gameName) throws DataAccessException {
         try {
             authDAO.getAuth(authToken);
         } catch (DataAccessException e) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException("Unauthorized");
         }
 
         int gameID;
@@ -66,13 +66,13 @@ public class GameService {
         return gameID;
     }
 
-    public boolean joinGame(String authToken, int gameID, String color) throws UnauthorizedException, BadRequestException {
+    public boolean joinGame(String authToken, int gameID, String color) throws DataAccessException {
         AuthData authData;
         GameData gameData;
         try {
             authData = authDAO.getAuth(authToken);
         } catch (DataAccessException e) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException("Unauthorized");
         }
 
         try {

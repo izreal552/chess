@@ -2,10 +2,13 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.BadRequestException;
+import dataaccess.DataAccessException;
 import dataaccess.UnauthorizedException;
 import model.GameData;
 import model.GamesList;
+import org.eclipse.jetty.server.Authentication;
 import service.GameService;
+import service.UserService;
 import spark.Request;
 import spark.Response;
 
@@ -28,7 +31,7 @@ public class GameHandler {
                 GamesList gameList = new GamesList(gameService.listGames(authToken));
                 response.status(200);
                 return new Gson().toJson(gameList);
-            } catch (UnauthorizedException e) {
+            } catch (DataAccessException e) {
                 String msg = e.getMessage();
                 if (msg != null && msg.toLowerCase().contains("unauthorized")) {
                     response.status(401);
@@ -51,7 +54,6 @@ public class GameHandler {
                 response.status(400);
                 return "{ \"message\": \"Error: bad request\" }";
             }
-
             GameData gameData = new Gson().fromJson(request.body(), GameData.class);
             String authToken = request.headers("authorization");
 
@@ -64,7 +66,7 @@ public class GameHandler {
                 int gameID = gameService.createGame(authToken, gameData.gameName());
                 response.status(200);
                 return "{ \"gameID\": %d }".formatted(gameID);
-            } catch (BadRequestException e) {
+            } catch (DataAccessException e) {
                 if (e.getMessage() != null && e.getMessage().toLowerCase().contains("already taken")) {
                     response.status(403);
                     return "{ \"message\": \"Error: already taken\" }";
@@ -112,7 +114,6 @@ public class GameHandler {
                 resp.status(400);
                 return "{ \"message\": \"Error: bad request\" }";
             } catch (UnauthorizedException e) {
-                // Only return 401 if the message explicitly indicates an auth issue
                 String msg = e.getMessage();
                 if (msg != null && (
                         msg.toLowerCase().contains("unauthorized") ||
