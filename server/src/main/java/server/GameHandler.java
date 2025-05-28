@@ -24,11 +24,13 @@ public class GameHandler {
             HashSet<GameData> games = gameService.listGames(authToken);
             response.status(200);
             return "{ \"games\": %s}".formatted(new Gson().toJson(games));
-        } catch (DataAccessException e) {
-            if (e.getMessage().toLowerCase().contains("unauthorized")) {
-                response.status(401);
-                return "{ \"message\": \"Error: Unauthorized\" }";
+        } catch (UnauthorizedException e) {
+            System.out.println("Caught");
+            if (e.getMessage().toLowerCase().contains("unauthorized") || e.getMessage().toLowerCase().contains("invalid")) {
+                System.out.println("invalid");
+                throw new UnauthorizedException("unauthorized");
             } else {
+                System.out.println("ELSE");
                 response.status(500);
                 return "{ \"message\": \"Error: " + e.getMessage() + "\" }";
             }

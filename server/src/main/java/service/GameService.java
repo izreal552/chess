@@ -23,7 +23,11 @@ public class GameService {
         try{
             authDAO.getAuth(authToken);
         } catch (DataAccessException error) {
-            throw new UnauthorizedException("Unauthorized");
+            if(error.getMessage().contains("failed")) {
+                throw new UnauthorizedException("failed");
+            }
+//            System.out.println(error);
+            throw new UnauthorizedException("invalid");
         }
         return gameDAO.listGames();
     }
@@ -32,7 +36,7 @@ public class GameService {
         try{
             authDAO.getAuth(authToken);
         }catch (DataAccessException error){
-            throw new DataAccessException("Does not exist");
+            throw new UnauthorizedException("Does not exist");
         }
         try{
             return gameDAO.getGame(gameID);
@@ -58,7 +62,11 @@ public class GameService {
         try {
             authData = authDAO.getAuth(authToken);
         } catch (DataAccessException e) {
-            throw new UnauthorizedException("Unauthorized");
+            System.out.println(e);
+            if(e.getMessage().contains("Auth")) {
+                throw new UnauthorizedException("auth");
+            }
+            throw new UnauthorizedException("invalid");
         }
 
         try {
