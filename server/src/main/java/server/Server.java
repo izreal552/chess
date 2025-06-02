@@ -29,6 +29,9 @@ public class Server {
         userHandler = new UserHandler(userService);
         gameHandler = new GameHandler(gameService);
 
+        try { DatabaseManager.createDatabase(); } catch (DataAccessException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     public int run(int desiredPort) {
@@ -49,17 +52,20 @@ public class Server {
         Spark.exception(UnauthorizedException.class, this::unauthorizedExceptionHandler);
         Spark.exception(Exception.class, this::genericExceptionHandler);
 
-        //This line initializes the server and can be removed once you have a functioning endpoint 
-        Spark.init();
-
         Spark.awaitInitialization();
         return Spark.port();
     }
 
-    private Object clear(Request request, Response response) {
+    public void clearDB() {
         userService.clear();
         gameService.clear();
-        response.status(200);
+    }
+
+    private Object clear(Request req, Response resp) {
+
+        clearDB();
+
+        resp.status(200);
         return "{}";
     }
 
