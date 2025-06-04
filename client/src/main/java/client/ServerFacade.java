@@ -12,74 +12,27 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 
 public class ServerFacade {
-    String baseURL =  "htt[:localhost:8080";
+    String baseURL = "http://localhost:8080";
     String authToken;
 
-    public ServerFacade(){
+    public ServerFacade() {
     }
 
-    public ServerFacade(String url){
+    public ServerFacade(String url) {
         baseURL = url;
     }
 
-    public boolean register(String username, String password, String email){
+    public boolean register(String username, String password, String email) {
         var body = Map.of("username", username, "password", password, "email", email);
         var jsonBody = new Gson().toJson(body);
         Map response = request("POST", "/user", jsonBody);
-        if(response.containsKey("Error")){
+        if (response.containsKey("Error")) {
             return false;
         }
         authToken = (String) response.get("authToken");
         return true;
-    }
-
-    private Map request(String method, String endpoint, String body) {
-        Map respMap;
-        try {
-            URI uri = new URI(baseURL + endpoint);
-            HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
-            http.setRequestMethod(method);
-
-            if (authToken != null) {
-                http.addRequestProperty("authorization", authToken);
-            }
-
-            if (!Objects.equals(body, null)) {
-                http.setDoOutput(true);
-                http.addRequestProperty("Content-Type", "application/json");
-                try (var outputStream = http.getOutputStream()) {
-                    outputStream.write(body.getBytes());
-                }
-            }
-
-            http.connect();
-
-            try {
-                if (http.getResponseCode() == 401) {
-                    return Map.of("Error", 401);
-                }
-            } catch (IOException e) {
-                return Map.of("Error", 401);
-            }
-
-
-            try (InputStream respBody = http.getInputStream()) {
-                InputStreamReader inputStreamReader = new InputStreamReader(respBody);
-                respMap = new Gson().fromJson(inputStreamReader, Map.class);
-            }
-
-        } catch (URISyntaxException | IOException e) {
-            return Map.of("Error", e.getMessage());
-        }
-
-        return respMap;
-    }
-
-    private Map request (String method, String endpoint) {
-        return request(method, endpoint, null);
     }
 
     public boolean login(String username, String password) {
@@ -94,7 +47,7 @@ public class ServerFacade {
     }
 
     public boolean logout() {
-        Map resp = request("DELETE", "/session");
+        Map resp = request("DELETE", "/session", null, true);
         if (resp.containsKey("Error")) {
             return false;
         }
@@ -114,84 +67,88 @@ public class ServerFacade {
     }
 
     public HashSet<GameData> listGames() {
-        String resp = requestString("GET", "/game");
+        String resp = requestRaw("GET", "/game", null);
         if (resp.contains("Error")) {
-            return HashSet.newHashSet(8);
+            return new HashSet<>();
         }
         GamesList games = new Gson().fromJson(resp, GamesList.class);
-
         return games.games();
     }
 
     public boolean joinGame(int gameId, String playerColor) {
-        Map body;
-        if (playerColor != null) {
-            body = Map.of("gameID", gameId, "playerColor", playerColor);
-        } else {
-            body = Map.of("gameID", gameId);
-        }
+        Map body = (playerColor != null)
+                ? Map.of("gameID", gameId, "playerColor", playerColor)
+                : Map.of("gameID", gameId);
         var jsonBody = new Gson().toJson(body);
         Map resp = request("PUT", "/game", jsonBody);
         return !resp.containsKey("Error");
     }
 
-    private String requestString(String method, String endpoint) {
-        return requestString(method, endpoint, null);
+    // Centralized request method to return a Map
+    private Map request(String method, String endpoint, String body) {
+        return request(method, endpoint, body, false);
     }
 
-    private String requestString(String method, String endpoint, String body) {
-        String resp;
+    private Map request(String method, String endpoint) {
+        return request(method, endpoint, null);
+    }
+
+    // Unified request method for both string and map
+    private Map request(String method, String endpoint, String body, boolean expectEmptyResponse) {
         try {
-            URI uri = new URI(baseURL + endpoint);
-            HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
-            http.setRequestMethod(method);
-
-            if (authToken != null) {
-                http.addRequestProperty("authorization", authToken);
+            HttpURLConnection http = setupConnection(method, endpoint, body);
+            if (http.getResponseCode() == 401) {
+                return Map.of("Error", 401);
             }
-
-            if (!Objects.equals(body, null)) {
-                http.setDoOutput(true);
-                http.addRequestProperty("Content-Type", "application/json");
-                try (var outputStream = http.getOutputStream()) {
-                    outputStream.write(body.getBytes());
-                }
+            if (expectEmptyResponse) {
+                return Map.of("Success", true);
             }
-
-            http.connect();
-
-            try {
-                if (http.getResponseCode() == 401) {
-                    return "Error: 401";
-                }
-            } catch (IOException e) {
-                return "Error: 401";
-            }
-
-
             try (InputStream respBody = http.getInputStream()) {
                 InputStreamReader inputStreamReader = new InputStreamReader(respBody);
-                resp = readerToString(inputStreamReader);
+                return new Gson().fromJson(inputStreamReader, Map.class);
             }
+        } catch (URISyntaxException | IOException e) {
+            return Map.of("Error", e.getMessage());
+        }
+    }
 
+    private String requestRaw(String method, String endpoint, String body) {
+        try {
+            HttpURLConnection http = setupConnection(method, endpoint, body);
+            if (http.getResponseCode() == 401) {
+                return "Error: 401";
+            }
+            try (InputStream respBody = http.getInputStream()) {
+                return readerToString(new InputStreamReader(respBody));
+            }
         } catch (URISyntaxException | IOException e) {
             return String.format("Error: %s", e.getMessage());
         }
-
-        return resp;
     }
 
-    private String readerToString(InputStreamReader reader) {
-        StringBuilder sb = new StringBuilder();
-        try {
-            for (int ch; (ch = reader.read()) != -1; ) {
-                sb.append((char) ch);
-            }
-            return sb.toString();
-        } catch (IOException e) {
-            return "";
+    private HttpURLConnection setupConnection(String method, String endpoint, String body) throws URISyntaxException, IOException {
+        URI uri = new URI(baseURL + endpoint);
+        HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
+        http.setRequestMethod(method);
+        if (authToken != null) {
+            http.addRequestProperty("authorization", authToken);
         }
-
+        if (body != null) {
+            http.setDoOutput(true);
+            http.addRequestProperty("Content-Type", "application/json");
+            try (var outputStream = http.getOutputStream()) {
+                outputStream.write(body.getBytes());
+            }
+        }
+        http.connect();
+        return http;
     }
 
+    private String readerToString(InputStreamReader reader) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        for (int ch; (ch = reader.read()) != -1; ) {
+            sb.append((char) ch);
+        }
+        return sb.toString();
+    }
 }
