@@ -21,76 +21,7 @@ public class POSTloginUI {
         games = new ArrayList<>();
     }
 
-    public void run() {
-        boolean loggedIn = true;
-        out.print(RESET_TEXT_COLOR + RESET_BG_COLOR);
-        while (loggedIn) {
-            String[] input = getUserInput();
-            switch (input[0]) {
-                case "quit":
-                    return;
-                case "help":
-                    printHelpMenu();
-                    break;
-                case "logout":
-                    server.logout();
-                    loggedIn = false;
-                    break;
-                case "list":
-                    refreshGames();
-                    printGames();
-                    break;
-                case "create":
-                    if (input.length != 2) {
-                        out.println("Please provide a name");
-                        printCreate();
-                        break;
-                    }
-                    int gameID = server.createGame(input[1]);
-                    out.printf("Created game, ID: %d%n", gameID);
-                    break;
-                case "join":
-                    if (input.length != 3) {
-                        out.println("Please provide a game ID and color choice");
-                        printJoin();
-                        break;
-                    }
-                    GameData joinGame = games.get(Integer.parseInt(input[1]));
-                    if (server.joinGame(joinGame.gameID(), input[2].toUpperCase())) {
-                        out.println("You have joined the game");
-                        new BoardPrinter(joinGame.game().getBoard()).printBoard();
-                        break;
-                    } else {
-                        out.println("Game does not exist or color taken");
-                        printJoin();
-                        break;
-                    }
-                case "observe":
-                    if (input.length != 2) {
-                        out.println("Please provide a game ID");
-                        printObserve();
-                        break;
-                    }
-                    GameData observeGame = games.get(Integer.parseInt(input[1]));
-                    if (server.joinGame(observeGame.gameID(), null)) {
-                        out.println("You have joined the game as an observer");
-                        new BoardPrinter(observeGame.game().getBoard()).printBoard();
-                        break;
-                    } else {
-                        out.println("Game does not exist");
-                        printObserve();
-                        break;
-                    }
-                default:
-                    out.println("Command not recognized, please try again");
-                    printHelpMenu();
-                    break;
-            }
-        }
 
-        PREloginUI prEloginUI = new PREloginUI(server);
-        prEloginUI.run();
-    }
 
     private String[] getUserInput() {
         out.print("\n[LOGGED IN] >>> ");
