@@ -16,58 +16,6 @@ public class PREloginUI {
         posTloginUI = new POSTloginUI(server);
     }
 
-    public void run() {
-        boolean loggedIn = false;
-        out.print(RESET_TEXT_COLOR + RESET_BG_COLOR);
-        out.println("Welcome to Chess! Enter 'help' to get started.");
-        while (!loggedIn) {
-            String[] input = getUserInput();
-            switch (input[0]) {
-                case "quit":
-                    return;
-                case "help":
-                    printHelpMenu();
-                    break;
-                case "login":
-                    if (input.length != 3) {
-                        out.println("Please provide a username and password");
-                        printLogin();
-                        break;
-                    }
-                    if (server.login(input[1], input[2])) {
-                        out.println("You are now logged in");
-                        loggedIn = true;
-                        break;
-                    } else {
-                        out.println("Username or password incorrect, please try again");
-                        printLogin();
-                        break;
-                    }
-                case "register":
-                    if (input.length != 4) {
-                        out.println("Please provide a username, password, and email");
-                        printRegister();
-                        break;
-                    }
-                    if (server.register(input[1], input[2], input[3])) {
-                        out.println("You are now registered and logged in");
-                        loggedIn = true;
-                        break;
-                    } else {
-                        out.println("Username already in use, please choose a new one");
-                        printRegister();
-                        break;
-                    }
-                default:
-                    out.println("Command not recognized, please try again");
-                    printHelpMenu();
-                    break;
-            }
-        }
-
-        posTloginUI.run();
-
-    }
 
     private String[] getUserInput() {
         out.print("\n[LOGGED OUT] >>> ");
