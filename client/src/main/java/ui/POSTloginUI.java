@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import client.ServerFacade;
 import model.GameData;
 
@@ -51,20 +52,28 @@ public class POSTloginUI {
                     break;
                 case "join":
                     if (input.length != 3) {
-                        out.println("Please provide a game ID and color choice");
-                        printJoin();
+                        out.println("Usage: join <LIST_ID> [WHITE|BLACK]");
+                        out.println("Note: Use the LIST_ID (first column) not the gameID");
                         break;
                     }
-                    GameData joinGame = games.get(Integer.parseInt(input[1]));
-                    if (server.joinGame(joinGame.gameID(), input[2].toUpperCase())) {
-                        out.println("You have joined the game");
-                        new BoardPrinter(joinGame.game().getBoard()).printBoard();
-                        break;
-                    } else {
-                        out.println("Game does not exist or color taken");
-                        printJoin();
-                        break;
+                    try {
+                        refreshGames();
+                        int listIndex = Integer.parseInt(input[1]);
+                        GameData game = games.get(listIndex);
+                        if (server.joinGame(game.gameID(), input[2].toUpperCase())) {
+                            out.println("Successfully joined game " + game.gameName());
+
+                            new BoardPrinter(game.game().getBoard()).printBoard();
+                            //
+                        } else {
+                            out.println("Failed to join game");
+                        }
+                    } catch (Exception e) {
+                        out.println("Incorrect Usage: " + e.getMessage());
+                        out.println("Usage: join <LIST_ID> [WHITE|BLACK]");
+                        out.println("Note: Use the LIST_ID (first column) not the gameID");
                     }
+                    break;
                 case "observe":
                     if (input.length != 2) {
                         out.println("Please provide a game ID");
@@ -102,6 +111,9 @@ public class POSTloginUI {
         games = new ArrayList<>();
         HashSet<GameData> gameList = server.listGames();
         games.addAll(gameList);
+        if(games.isEmpty()){
+            out.println("There are currently no games");
+        }
     }
 
     private void printGames() {
