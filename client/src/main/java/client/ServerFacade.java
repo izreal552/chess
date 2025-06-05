@@ -84,7 +84,6 @@ public class ServerFacade {
         return !resp.containsKey("Error");
     }
 
-    // Centralized request method to return a Map
     private Map request(String method, String endpoint, String body) {
         return request(method, endpoint, body, false);
     }
@@ -93,7 +92,6 @@ public class ServerFacade {
         return request(method, endpoint, null);
     }
 
-    // Unified request method for both string and map
     private Map request(String method, String endpoint, String body, boolean expectEmptyResponse) {
         try {
             HttpURLConnection http = setupConnection(method, endpoint, body);

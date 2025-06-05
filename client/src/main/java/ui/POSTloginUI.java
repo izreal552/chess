@@ -75,26 +75,32 @@ public class POSTloginUI {
                     }
                     break;
                 case "observe":
-                    if (input.length != 2) {
+                    try{
+                        if (input.length != 2) {
                         out.println("Please provide a game ID");
                         printObserve();
                         break;
-                    }
-                    int listIndex = Integer.parseInt(input[1]);
-                    if (listIndex < 0 || listIndex >= games.size()) {
+                        }
+                        int listIndex = Integer.parseInt(input[1]);
+                        if (listIndex < 0 || listIndex >= games.size()) {
                         out.println("Invalid game index. Use the ID from the 'list' command.");
                         break;
-                    }
-                    GameData observeGame = games.get(Integer.parseInt(input[1]));
-                    if (server.joinGame(observeGame.gameID(), null)) {
+                        }
+                        GameData observeGame = games.get(Integer.parseInt(input[1]));
+                        if (server.joinGame(observeGame.gameID(), null)) {
                         out.println("You are now observing game "+ observeGame.gameName());
                         new BoardPrinter(observeGame.game().getBoard()).printBoard();
                         break;
-                    } else {
+                        } else {
                         out.println("Game does not exist");
                         printObserve();
                         break;
+                        }
+                    } catch (Exception e){
+                        out.println("Incorrect Usage: " + e.getMessage());
+                        out.println("Please provide a valid game ID from LIST");
                     }
+                    break;
                 default:
                     out.println("Command not recognized, please try again");
                     printHelpMenu();
