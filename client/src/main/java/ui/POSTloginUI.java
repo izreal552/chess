@@ -62,9 +62,9 @@ public class POSTloginUI {
                         GameData game = games.get(listIndex);
                         if (server.joinGame(game.gameID(), input[2].toUpperCase())) {
                             out.println("Successfully joined game " + game.gameName());
-
-                            new BoardPrinter(game.game().getBoard()).printBoard();
-                            //
+                            ChessGame.TeamColor color = input[2].equalsIgnoreCase("WHITE") ?
+                                    ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+                            new BoardPrinter(game.game().getBoard(), color).printBoard();
                         } else {
                             out.println("Failed to join game");
                         }
@@ -89,7 +89,7 @@ public class POSTloginUI {
                         GameData observeGame = games.get(Integer.parseInt(input[1]));
                         if (server.joinGame(observeGame.gameID(), null)) {
                         out.println("You are now observing game "+ observeGame.gameName());
-                        new BoardPrinter(observeGame.game().getBoard()).printBoard();
+                        new BoardPrinter(observeGame.game().getBoard(), ChessGame.TeamColor.WHITE).printBoard();
                         break;
                         } else {
                         out.println("Game does not exist");

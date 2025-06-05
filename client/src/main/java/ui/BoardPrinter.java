@@ -10,30 +10,27 @@ import static ui.EscapeSequences.*;
 
 public class BoardPrinter {
     ChessBoard board;
+    ChessGame.TeamColor playerColor;
 
-    BoardPrinter(ChessBoard board) {
+    BoardPrinter(ChessBoard board, ChessGame.TeamColor playerColor) {
         this.board = board;
+        this.playerColor = playerColor;
     }
 
     void printBoard() {
         StringBuilder output = new StringBuilder();
         output.append(SET_TEXT_BOLD);
 
-        boolean reversed = true;
-        for (int j = 0; j < 2; j++) {
+        boolean reversed = (playerColor == ChessGame.TeamColor.BLACK);
 
-            output.append(startingRow(reversed));
+        output.append(startingRow(reversed));
 
-            for (int i = 8; i > 0; i--) {
-                int row = !reversed ? i : (i * -1) + 9;
-                output.append(boardRow(row, reversed));
-            }
-
-            output.append(startingRow(reversed));
-            if (j < 1) {output.append("\n");}
-
-            reversed = false;
+        for (int i = 8; i > 0; i--) {
+            int row = !reversed ? i : (i * -1) + 9;
+            output.append(boardRow(row, reversed));
         }
+
+        output.append(startingRow(reversed));
         output.append(RESET_TEXT_BOLD_FAINT);
         out.println(output);
     }

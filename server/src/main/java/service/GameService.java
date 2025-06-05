@@ -1,6 +1,7 @@
 package service;
 
 
+import chess.ChessGame;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
@@ -50,7 +51,7 @@ public class GameService {
             gameID = ThreadLocalRandom.current().nextInt(1, 10000); // in case the game ID is in use, will find another one
         } while (gameDAO.gameExists(gameID));
 
-        gameDAO.createGame(new GameData(gameID, null, null, gameName, null));
+        gameDAO.createGame(new GameData(gameID, null, null, gameName, new ChessGame()));
         return gameID;
     }
 
@@ -60,7 +61,6 @@ public class GameService {
         try {
             authData = authDAO.getAuth(authToken);
         } catch (DataAccessException e) {
-//            System.out.println(e);
             if(e.getMessage().contains("Auth")) {
                 throw new UnauthorizedException("auth");
             }
