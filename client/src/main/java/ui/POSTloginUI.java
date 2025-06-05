@@ -80,9 +80,14 @@ public class POSTloginUI {
                         printObserve();
                         break;
                     }
+                    int listIndex = Integer.parseInt(input[1]);
+                    if (listIndex < 0 || listIndex >= games.size()) {
+                        out.println("Invalid game index. Use the ID from the 'list' command.");
+                        break;
+                    }
                     GameData observeGame = games.get(Integer.parseInt(input[1]));
                     if (server.joinGame(observeGame.gameID(), null)) {
-                        out.println("You have joined the game as an observer");
+                        out.println("You are now observing game "+ observeGame.gameName());
                         new BoardPrinter(observeGame.game().getBoard()).printBoard();
                         break;
                     } else {
