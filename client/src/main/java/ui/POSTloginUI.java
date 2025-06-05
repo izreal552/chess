@@ -48,11 +48,11 @@ public class POSTloginUI {
                         break;
                     }
                     int gameID = server.createGame(input[1]);
-                    out.printf("Created game, ID: %d%n", gameID);
+                    out.println("Created game");
                     break;
                 case "join":
                     if (input.length != 3) {
-                        out.println("Usage: join <LIST_ID> [WHITE|BLACK]");
+                        out.println("join <LIST_ID> [WHITE|BLACK]");
                         out.println("Note: Use the LIST_ID (first column) not the gameID");
                         break;
                     }
@@ -60,6 +60,8 @@ public class POSTloginUI {
                         refreshGames();
                         int listIndex = Integer.parseInt(input[1]);
                         GameData game = games.get(listIndex);
+//                        out.println(listIndex);
+//                        out.println(game.gameID());
                         if (server.joinGame(game.gameID(), input[2].toUpperCase())) {
                             out.println("Successfully joined game " + game.gameName());
                             ChessGame.TeamColor color = input[2].equalsIgnoreCase("WHITE") ?
@@ -69,38 +71,33 @@ public class POSTloginUI {
                             out.println("Failed to join game");
                         }
                     } catch (Exception e) {
-                        out.println("Incorrect Usage: " + e.getMessage());
-                        out.println("Usage: join <LIST_ID> [WHITE|BLACK]");
+                        out.println("Incorrect input, choose valid game ID from LIST");
+                        out.println("join <LIST_ID> [WHITE|BLACK]");
                         out.println("Note: Use the LIST_ID (first column) not the gameID");
                     }
                     break;
                 case "observe":
-                    try{
-                        if (input.length != 2) {
+                    if (input.length != 2) {
                         out.println("Please provide a game ID");
                         printObserve();
                         break;
-                        }
-                        int listIndex = Integer.parseInt(input[1]);
-                        if (listIndex < 0 || listIndex >= games.size()) {
-                        out.println("Invalid game index. Use the ID from the 'list' command.");
-                        break;
-                        }
-                        GameData observeGame = games.get(Integer.parseInt(input[1]));
-                        if (server.joinGame(observeGame.gameID(), null)) {
-                        out.println("You are now observing game "+ observeGame.gameName());
+                    }
+                    int listIndex = Integer.parseInt(input[1]);
+                    if (listIndex < 0 || listIndex >= games.size()) {
+                    out.println("Invalid game index. Use the ID from the 'list' command.");
+                    break;
+                    }
+                    GameData observeGame = games.get(Integer.parseInt(input[1]));
+                    System.out.println("About to call joinGame with ID: " + observeGame.gameID());
+                    if (server.joinGame(observeGame.gameID(), null)) {
+                        out.println("You have joined the game as an observer");
                         new BoardPrinter(observeGame.game().getBoard(), ChessGame.TeamColor.WHITE).printBoard();
-                        break;
-                        } else {
+                    } else {
                         out.println("Game does not exist");
                         printObserve();
-                        break;
-                        }
-                    } catch (Exception e){
-                        out.println("Incorrect Usage: " + e.getMessage());
-                        out.println("Please provide a valid game ID from LIST");
                     }
                     break;
+
                 default:
                     out.println("Command not recognized, please try again");
                     printHelpMenu();
