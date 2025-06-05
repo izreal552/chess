@@ -47,7 +47,6 @@ public class POSTloginUI {
                         printCreate();
                         break;
                     }
-                    int gameID = server.createGame(input[1]);
                     out.println("Created game");
                     break;
                 case "join":
