@@ -25,16 +25,13 @@ public class HttpCommunicator {
 
     public boolean register(String username, String password, String email) {
         var body = Map.of("username", username, "password", password, "email", email);
-        Map<String, Object> resp = request("POST", "/user", gson.toJson(body));
+        var jsonBody = new Gson().toJson(body);
+        Map resp = request("POST", "/user", jsonBody);
         if (resp.containsKey("Error")) {
             return false;
         }
-        authToken = (String) resp.get("authToken");
+        facade.setAuthToken((String) resp.get("authToken"));
         return true;
-    }
-
-    public void setServerPort(int port) {
-        this.baseURL = "http://localhost:" + port;
     }
 
     public boolean logout() {
