@@ -45,11 +45,12 @@ public class HttpCommunicator {
 
     public boolean login(String username, String password) {
         var body = Map.of("username", username, "password", password);
-        Map<String, Object> resp = request("POST", "/session", gson.toJson(body));
+        var jsonBody = new Gson().toJson(body);
+        Map resp = request("POST", "/session", jsonBody);
         if (resp.containsKey("Error")) {
             return false;
         }
-        authToken = (String) resp.get("authToken");
+        facade.setAuthToken((String) resp.get("authToken"));
         return true;
     }
 
