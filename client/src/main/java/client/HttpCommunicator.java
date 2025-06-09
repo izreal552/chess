@@ -12,6 +12,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 
 public class HttpCommunicator {
 
@@ -34,15 +35,6 @@ public class HttpCommunicator {
         return true;
     }
 
-    public boolean logout() {
-        Map resp = request("DELETE", "/session");
-        if (resp.containsKey("Error")) {
-            return false;
-        }
-        facade.setAuthToken(null);
-        return true;
-    }
-
     public boolean login(String username, String password) {
         var body = Map.of("username", username, "password", password);
         var jsonBody = new Gson().toJson(body);
@@ -51,6 +43,15 @@ public class HttpCommunicator {
             return false;
         }
         facade.setAuthToken((String) resp.get("authToken"));
+        return true;
+    }
+
+    public boolean logout() {
+        Map resp = request("DELETE", "/session");
+        if (resp.containsKey("Error")) {
+            return false;
+        }
+        facade.setAuthToken(null);
         return true;
     }
 
@@ -128,16 +129,19 @@ public class HttpCommunicator {
         URI uri = new URI(baseURL + endpoint);
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setRequestMethod(method);
-        if (authToken != null) {
-            http.addRequestProperty("authorization", authToken);
+
+        if (facade.getAuthToken() != null) {
+            http.addRequestProperty("authorization", facade.getAuthToken());
         }
-        if (body != null) {
+
+        if (!Objects.equals(body, null)) {
             http.setDoOutput(true);
             http.addRequestProperty("Content-Type", "application/json");
             try (var outputStream = http.getOutputStream()) {
                 outputStream.write(body.getBytes());
             }
         }
+
         http.connect();
         return http;
     }
