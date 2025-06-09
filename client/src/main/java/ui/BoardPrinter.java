@@ -1,38 +1,56 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
+
+import java.util.Collection;
+import java.util.HashSet;
 
 import static java.lang.System.out;
 import static ui.EscapeSequences.*;
 
 public class BoardPrinter {
-    ChessBoard board;
-    ChessGame.TeamColor playerColor;
+    ChessGame game;
 
-    BoardPrinter(ChessBoard board, ChessGame.TeamColor playerColor) {
-        this.board = board;
-        this.playerColor = playerColor;
+    public BoardPrinter(ChessGame game) {
+        this.game = game;
     }
 
-    void printBoard() {
+    public void updateGame(ChessGame game) {
+        this.game = game;
+    }
+
+    public void printBoard(ChessGame.TeamColor color, ChessPosition selectedPos) {
         StringBuilder output = new StringBuilder();
         output.append(SET_TEXT_BOLD);
 
-        boolean reversed = (playerColor == ChessGame.TeamColor.BLACK);
-
-        output.append(startingRow(reversed));
-
-        for (int i = 8; i > 0; i--) {
-            int row = !reversed ? i : (i * -1) + 9;
-            output.append(boardRow(row, reversed));
+        Collection<ChessMove> possibleMoves = selectedPos != null ? game.validMoves(selectedPos) : null;
+        HashSet<ChessPosition> possibleSquares = HashSet.newHashSet(possibleMoves != null ? possibleMoves.size() : 0);
+        if (possibleMoves != null) {
+            for (ChessMove move : possibleMoves) {
+                possibleSquares.add(move.getEndPosition());
+            }
         }
 
-        output.append(startingRow(reversed));
+        // if reversed, then it is printed with black forward
+        boolean reversed = color == ChessGame.TeamColor.BLACK;
+        int printCount = color == null ? 2 : 1;
+        for (int j = 0; j < printCount; j++) {
+
+            output.append(startingRow(reversed));
+
+            for (int i = 8; i > 0; i--) {
+                int row = !reversed ? i : (i * -1) + 9;
+                output.append(boardRow(row, reversed, selectedPos, possibleSquares));
+            }
+
+            output.append(startingRow(reversed));
+            if (j < printCount - 1) output.append("\n");
+
+            reversed = !reversed;
+        }
         output.append(RESET_TEXT_BOLD_FAINT);
         out.println(output);
+        out.printf("Turn: %s\n", game.getTeamTurn().toString());
     }
 
     private String startingRow(boolean reversed) {
@@ -46,7 +64,8 @@ public class BoardPrinter {
         return output.toString();
     }
 
-    private String boardRow(int row, boolean reversed) {
+    private String boardRow(int row, boolean reversed, ChessPosition selectedPos,
+                            HashSet<ChessPosition> possibleSquares) {
         StringBuilder output = new StringBuilder();
         output.append(SET_BG_COLOR_BLACK);
         output.append(SET_TEXT_COLOR_BLUE);
@@ -88,7 +107,7 @@ public class BoardPrinter {
     private String piece(int row, int column) {
         StringBuilder output = new StringBuilder();
         ChessPosition position = new ChessPosition(row, column);
-        ChessPiece piece = board.getPiece(position);
+        ChessPiece piece = game.getBoard().getPiece(position);
 
         if (piece != null) {
             if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
