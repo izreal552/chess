@@ -39,7 +39,7 @@ public class HttpCommunicator {
         if (resp.containsKey("Error")) {
             return false;
         }
-        authToken = null;
+        facade.setAuthToken(null);
         return true;
     }
 
