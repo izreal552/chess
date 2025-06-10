@@ -4,17 +4,10 @@ import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import model.GameData;
-import model.GamesList;
+import websocket.commands.*;
 import websocket.commands.UserGameCommand;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashSet;
-import java.util.Map;
 
 public class ServerFacade {
 
@@ -79,11 +72,11 @@ public class ServerFacade {
     }
 
     public void joinPlayer(int gameID, ChessGame.TeamColor color) {
-        sendCommand(new JoinPlayer(authToken, gameID, color));
+        sendCommand(new Connect(authToken, gameID, Connect.Role.PLAYER));
     }
 
     public void joinObserver(int gameID) {
-        sendCommand(new JoinObserver(authToken, gameID));
+        sendCommand(new Connect(authToken, gameID, Connect.Role.OBSERVER));
     }
 
     public void makeMove(int gameID, ChessMove move) {
