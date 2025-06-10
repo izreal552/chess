@@ -44,7 +44,7 @@ public class BoardPrinter {
             }
 
             output.append(startingRow(reversed));
-            if (j < printCount - 1) output.append("\n");
+            if (j < printCount - 1) {output.append("\n");}
 
             reversed = !reversed;
         }
